@@ -1,11 +1,7 @@
-# Use a Docker image with Docker installed
-image: docker:dind
+image: atlassian/default-image:4
 
-options:
-  docker: true
-
-pipelines:
-  default:
+definitions:
+  steps:
     - step: &docker-build
         name: Docker Build
         services:
@@ -14,34 +10,53 @@ pipelines:
           - docker
         script:
           - docker info
-          - docker build -t ssz-statistics-bot --build-arg PORT=3001 --build-arg BASE_URI=http://localhost .
+          - BASE_NAME="${PRIVATE_DOCKER_REGISTRY_URL}/rax/${BITBUCKET_REPO_SLUG}"
+          - BUILD_TAG="build${BITBUCKET_BUILD_NUMBER}_${BITBUCKET_COMMIT:0:7}"
+          - docker build -t "${BASE_NAME}:${BUILD_TAG}"
+            --build-arg PORT=3001
+            --build-arg BASE_URI=http://localhost
+            .
+          - docker images "${BASE_NAME}:${BUILD_TAG}"
+    - step: &docker-build-push
+        name: Docker Build & Push
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - docker info
+          - |
+            if [[ "$BITBUCKET_TAG" =~ ^v[0-9.]+$ ]]; then
+              # If there's a TAG, set the package-version correctly
+              (cd app && npm version "${BITBUCKET_TAG#v}")
+            fi
+          - docker login -u ${PRIVATE_DOCKER_REGISTRY_USER} --password-stdin ${PRIVATE_DOCKER_REGISTRY_URL} <<<"${PRIVATE_DOCKER_REGISTRY_PASS}"
+          - BASE_NAME="${PRIVATE_DOCKER_REGISTRY_URL}/rax/${BITBUCKET_REPO_SLUG}"
+          - BUILD_TAG="build${BITBUCKET_BUILD_NUMBER}_${BITBUCKET_COMMIT:0:7}"
+          - BASE_VERSION="$(jq -r '.version' package.json)"
+          - docker build -t "${BASE_NAME}:${BUILD_TAG}"
+            .
+          - docker push "${BASE_NAME}:${BUILD_TAG}"
+          - |
+            EXTRA_TAGS=()
+            if [[ "$BITBUCKET_TAG" =~ ^v[0-9.]+$ ]]; then
+              EXTRA_TAGS+=( "${BITBUCKET_TAG#v}" )
+            elif [ "$BITBUCKET_BRANCH" == "main" ]; then
+              EXTRA_TAGS+=( "$BASE_VERSION" "latest" )
+            fi
+            for tag in "${EXTRA_TAGS[@]}"; do
+              docker tag "${BASE_NAME}:${BUILD_TAG}" "${BASE_NAME}:${tag}"
+              docker push "${BASE_NAME}:${tag}"
+              echo "Pushed ${BASE_NAME}:${tag}"
+            done
+          - docker images "${BASE_NAME}:${BUILD_TAG}"
+
+pipelines:
+  default:
+    - step: *docker-build
   pull-requests:
     '**':
-      - step: &docker-build-push
-          name: Docker Build & Push
-          services:
-            - docker
-          caches:
-            - docker
-          script:
-            - docker info
-            - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin $DOCKER_REGISTRY_URL
-            - BASE_NAME="$DOCKER_REGISTRY_URL/$DOCKER_REPOSITORY"
-            - BUILD_TAG="build${BITBUCKET_BUILD_NUMBER}_${BITBUCKET_COMMIT::7}"
-            - docker build -t "${BASE_NAME}:${BUILD_TAG}" .
-            - docker push "${BASE_NAME}:${BUILD_TAG}"
-            - |
-              EXTRA_TAGS=()
-              if [[ "$BITBUCKET_TAG" =~ ^v[0-9.]+$ ]]; then
-                EXTRA_TAGS+=( "${BITBUCKET_TAG#v}" )
-              elif [ "$BITBUCKET_BRANCH" == "main" ]; then
-                EXTRA_TAGS+=( "latest" )
-              fi
-              for tag in "${EXTRA_TAGS[@]}"; do
-                docker tag "${BASE_NAME}:${BUILD_TAG}" "${BASE_NAME}:${tag}"
-                docker push "${BASE_NAME}:${tag}"
-                echo "Pushed ${BASE_NAME}:${tag}"
-              done
+      - step: *docker-build-push
   branches:
     main:
       - step: *docker-build-push
