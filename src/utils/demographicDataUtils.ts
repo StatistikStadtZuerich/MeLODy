@@ -109,7 +109,7 @@ const herkunftsString = (herkunft: unknown): 'Schweizer*in' | 'Ausländer*in' | 
 
 export const demographicKeyMap: Record<string, keyof DemographicData> = {
     sex: "SexKurz",
-    origin: "HerkunftLang",
+    herkunft: "HerkunftLang",
     year: "StichtagDatJahr",
     kreis: "KreisLang",
     quar: "QuarLang",

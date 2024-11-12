@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  ssz-statistics-bot:
+    container_name: ssz-statistics-bot-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - BASE_URI=http://localhost
+      - BASE_PATH=/api/v1

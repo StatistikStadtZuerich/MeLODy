@@ -139,7 +139,7 @@ export interface DemographicDataRequest {
  *           example: ['year', 'sex']
  *           enum:
  *             - sex
- *             - origin
+ *             - herkunft
  *             - year
  *             - kreis
  *             - quar
