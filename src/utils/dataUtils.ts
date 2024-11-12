@@ -356,14 +356,12 @@ export const groupDataByQueryParamsWithValues = <T extends Record<string, any>>(
     subroutes: string[]
 ): {
     keys: string[];
-    result: Record<string, any>;
+    result: any;
     total: number;
 } => {
-    const dataKeys = subroutes
-        .filter((key) => data.some((item) => key in item))
-        .map((key) => key as keyof T);
+    const dataKeys = subroutes.filter((key) => data.some((item) => key in item));
 
-    const result: Record<string, any> = {};
+    const result: any = {};
 
     data.forEach((item) => {
         let currentLevel = result;
@@ -377,27 +375,50 @@ export const groupDataByQueryParamsWithValues = <T extends Record<string, any>>(
             }
 
             if (i < dataKeys.length - 1) {
-                // Intermediate levels: use keyValue as key
                 if (!currentLevel[keyValue]) {
                     currentLevel[keyValue] = {};
                 }
                 currentLevel = currentLevel[keyValue];
             } else {
-                // Deepest level: collect keyValues into an array
-                if (!currentLevel.values) {
-                    currentLevel.values = [];
+                if (!currentLevel._values) {
+                    currentLevel._values = new Set();
                 }
-                currentLevel.values.push(keyValue);
+                currentLevel._values.add(keyValue);
             }
         }
     });
 
+    const cleanResult = transformResult(result);
+
     return {
-        keys: dataKeys as string[],
-        total: data.length,
-        result,
+        keys: dataKeys,
+        total: Object.keys(cleanResult).length,
+        result: cleanResult,
     };
 };
+
+function transformResult(obj: any): any {
+    if (typeof obj !== 'object' || obj === null) {
+        return obj;
+    }
+
+    if (obj._values) {
+        const valuesArray = Array.from(obj._values);
+        if (valuesArray.length === 1) {
+            return valuesArray[0];
+        } else {
+            return valuesArray;
+        }
+    }
+
+    const keys = Object.keys(obj).filter((key) => key !== '_values');
+
+    for (const key of keys) {
+        obj[key] = transformResult(obj[key]);
+    }
+
+    return obj;
+}
 
 export const sumNumericValues = (obj: Record<string, any>): number => {
 

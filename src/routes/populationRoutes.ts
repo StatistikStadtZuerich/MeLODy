@@ -1,8 +1,7 @@
 import {PopulationData} from "../models/populationData";
 import {Router} from "express";
 import {sszDataFetcher} from "../services/sszDataFetcher";
-import {applyPagination, dataResponse} from "../utils/routeUtils";
-import {sortData} from "../utils/dataUtils";
+import {groupDataByQueryParamsWithValues} from "../utils/dataUtils";
 
 const populationQueryUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=9bacf5c9-a8c0-416d-a162-3b5f0a2d300d&limit=1000";
 let results: PopulationData[] = [];
@@ -45,27 +44,6 @@ const router = Router();
  *         schema:
  *           type: integer
  *         description: Filter by maximum population
- *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *         description: The number of items to skip before starting to collect the result set
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: The number of items to return
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [year, population]
- *         description: The field to sort by
- *       - in: query
- *         name: sortAsc
- *         schema:
- *           type: boolean
- *         description: Whether to sort in ascending order (true) or descending order (false)
  *     responses:
  *       200:
  *         description: A list of population data
@@ -97,52 +75,35 @@ const router = Router();
  */
 router.get('/', async (req, res) => {
     const {year, startYear, endYear, minPopulation, maxPopulation, offset, limit, sortBy, sortAsc} = req.query;
-
     if (results.length === 0) {
         res.status(404).json({error: 'No data found for the specified parameters'});
         return;
     }
 
+    let filteredResults = results;
+
     if (year) {
-        results = results.filter(entry => entry.StichtagDatJahr === String(year));
+        filteredResults = filteredResults.filter(entry => entry.StichtagDatJahr === String(year));
     }
 
     if (startYear) {
-        results = results.filter(entry => parseInt(entry.StichtagDatJahr) >= parseInt(String(startYear)));
+        filteredResults = filteredResults.filter(entry => parseInt(entry.StichtagDatJahr) >= parseInt(String(startYear)));
     }
     if (endYear) {
-        results = results.filter(entry => parseInt(entry.StichtagDatJahr) <= parseInt(String(endYear)));
+        filteredResults = filteredResults.filter(entry => parseInt(entry.StichtagDatJahr) <= parseInt(String(endYear)));
     }
 
     if (minPopulation) {
-        results = results.filter(entry => entry.AnzBestWir >= parseInt(String(minPopulation)));
+        filteredResults = filteredResults.filter(entry => entry.AnzBestWir >= parseInt(String(minPopulation)));
     }
     if (maxPopulation) {
-        results = results.filter(entry => entry.AnzBestWir <= parseInt(String(maxPopulation)));
+        filteredResults = filteredResults.filter(entry => entry.AnzBestWir <= parseInt(String(maxPopulation)));
     }
 
-    sortData(results, sortBy?.toString(), sortAsc === 'true');
 
-    // if (sortBy) {
-    //     const isAscending = sortAsc === 'true'; // Convert to boolean
-    //     switch (sortBy) {
-    //         case 'year':
-    //             results.sort((a, b) => {
-    //                 const yearA = parseInt(a.StichtagDatJahr);
-    //                 const yearB = parseInt(b.StichtagDatJahr);
-    //                 return isAscending ? yearA - yearB : yearB - yearA;
-    //             });
-    //             break;
-    //         case 'population':
-    //             results.sort((a, b) => isAscending ? a.AnzBestWir - b.AnzBestWir : b.AnzBestWir - a.AnzBestWir);
-    //             break;
-    //     }
-    // }
-
-    const paginatedResults = applyPagination(req, results);
-
-    if (paginatedResults.length > 0) {
-        dataResponse(res, paginatedResults, results.length);
+    if (filteredResults.length > 0) {
+        const resValues = groupDataByQueryParamsWithValues(filteredResults, ['StichtagDatJahr', 'AnzBestWir'])
+        res.status(200).json(resValues)
     } else {
         res.status(404).json({error: 'No data found for the specified parameters'});
     }

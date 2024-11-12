@@ -1,8 +1,7 @@
 import {Router} from "express";
 import {sszDataFetcher} from "../services/sszDataFetcher";
 import {IncomeData} from "../models/incomeData";
-import {applyPagination, dataResponse, extractLimitAndOffset} from "../utils/routeUtils";
-import kMeansSampling from "../utils/kMeansDataExtraction";
+import {applyPagination, dataResponse} from "../utils/routeUtils";
 import {groupDataByQueryParamsWithValues, sortData} from "../utils/dataUtils";
 import {bodyToIncomeDataRequest, filterIncomeData} from "../utils/incomeDataUtils";
 
@@ -67,16 +66,6 @@ const router = Router();
  *           type: number
  *         description: Filter by maximum income at 75th percentile
  *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *         description: The number of items to skip before starting to collect the result set
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: The number of items to return
- *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
@@ -87,11 +76,6 @@ const router = Router();
  *         schema:
  *           type: boolean
  *         description: Whether to sort in ascending order (true) or descending order (false)
- *       - in: query
- *         name: reduce
- *         schema:
- *           type: boolean
- *         description: Reduce a large dataset into a smaller one with the same date range
  *     responses:
  *       200:
  *         description: A list of income data
@@ -127,14 +111,12 @@ router.get('/', async (req, res) => {
             maxIncomeP75,
             sortBy,
             sortAsc,
-            reduce
         } = req.query;
 
-        const {limit, offset} = extractLimitAndOffset(req)
-
+        let filteredResults = results
 
         if (startYear || endYear) {
-            results = results.filter(entry => {
+            filteredResults = filteredResults.filter(entry => {
                 const entryYear = parseInt(entry.StichtagDatJahr, 10);
                 if (startYear && endYear) {
                     return entryYear >= parseInt(String(startYear), 10) && entryYear <= parseInt(String(endYear), 10);
@@ -148,59 +130,33 @@ router.get('/', async (req, res) => {
         }
 
         if (year) {
-            results = results.filter(entry => entry.StichtagDatJahr === String(year));
+            filteredResults = filteredResults.filter(entry => entry.StichtagDatJahr === String(year));
         }
 
         if (district) {
-            results = results.filter(entry => entry.QuarLang.toLowerCase() === String(district).toLowerCase());
+            filteredResults = filteredResults.filter(entry => entry.QuarLang.toLowerCase() === String(district).toLowerCase());
         }
 
         if (taxCategory) {
-            results = results.filter(entry => entry.SteuerTarifLang.toLowerCase() === String(taxCategory).toLowerCase());
+            filteredResults = filteredResults.filter(entry => entry.SteuerTarifLang.toLowerCase() === String(taxCategory).toLowerCase());
         }
 
         if (minMedianIncome) {
-            results = results.filter(entry => entry.SteuerEinkommen_p50 >= parseFloat(String(minMedianIncome)));
+            filteredResults = filteredResults.filter(entry => entry.SteuerEinkommen_p50 >= parseFloat(String(minMedianIncome)));
         }
         if (maxMedianIncome) {
-            results = results.filter(entry => entry.SteuerEinkommen_p50 <= parseFloat(String(maxMedianIncome)));
+            filteredResults = filteredResults.filter(entry => entry.SteuerEinkommen_p50 <= parseFloat(String(maxMedianIncome)));
         }
 
         if (minIncomeP25) {
-            results = results.filter(entry => entry.SteuerEinkommen_p25 >= parseFloat(String(minIncomeP25)));
+            filteredResults = filteredResults.filter(entry => entry.SteuerEinkommen_p25 >= parseFloat(String(minIncomeP25)));
         }
         if (maxIncomeP75) {
-            results = results.filter(entry => entry.SteuerEinkommen_p75 <= parseFloat(String(maxIncomeP75)));
+            filteredResults = filteredResults.filter(entry => entry.SteuerEinkommen_p75 <= parseFloat(String(maxIncomeP75)));
         }
 
-
-        if (reduce) {
-            const key = district ? "QuarLang" : "SteuerTarifLang";
-            const value = (district ? district : taxCategory) || results[0].SteuerTarifLang;
-            results = kMeansSampling(results, limit || 2000, key, String(value));
-        }
-        // else if (reduce === 'fps') {
-        //     results = farthestPointSampling(results, limit || 1000, "SteuerTarifLang", results[0].SteuerTarifLang);
-        // }
-
-        sortData(results, sortBy?.toString(), sortAsc === 'true')
-        // if (sortBy && typeof sortBy === 'string') {
-        //     const isAscending = sortAsc === 'true';
-        //     const sortKey = sortBy as keyof IncomeData;
-        //
-        //     results.sort((a: IncomeData, b: IncomeData) => {
-        //         const aValue: string | number = a[sortKey];
-        //         const bValue: string | number = b[sortKey];
-        //         if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
-        //             return isAscending ? Number(aValue) - Number(bValue) : Number(bValue) - Number(aValue);
-        //         } else if (typeof aValue === 'string' && typeof bValue === 'string') {
-        //             return isAscending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-        //         }
-        //         return 0
-        //     });
-        // }
-
-        const paginatedResults = applyPagination(req, results);
+        sortData(filteredResults, sortBy?.toString(), sortAsc === 'true')
+        const paginatedResults = applyPagination(req, filteredResults);
 
         if (paginatedResults.length > 0) {
             dataResponse(res, paginatedResults, results.length);
