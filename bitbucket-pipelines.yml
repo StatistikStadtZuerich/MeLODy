@@ -1,0 +1,53 @@
+# Use a Docker image with Docker installed
+image: docker:dind
+
+options:
+  docker: true
+
+pipelines:
+  default:
+    - step: &docker-build
+        name: Docker Build
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - docker info
+          - docker build -t ssz-statistics-bot .
+  pull-requests:
+    '**':
+      - step: &docker-build-push
+          name: Docker Build & Push
+          services:
+            - docker
+          caches:
+            - docker
+          script:
+            - docker info
+            - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin $DOCKER_REGISTRY_URL
+            - BASE_NAME="$DOCKER_REGISTRY_URL/$DOCKER_REPOSITORY"
+            - BUILD_TAG="build${BITBUCKET_BUILD_NUMBER}_${BITBUCKET_COMMIT::7}"
+            - docker build -t "${BASE_NAME}:${BUILD_TAG}" .
+            - docker push "${BASE_NAME}:${BUILD_TAG}"
+            - |
+              EXTRA_TAGS=()
+              if [[ "$BITBUCKET_TAG" =~ ^v[0-9.]+$ ]]; then
+                EXTRA_TAGS+=( "${BITBUCKET_TAG#v}" )
+              elif [ "$BITBUCKET_BRANCH" == "main" ]; then
+                EXTRA_TAGS+=( "latest" )
+              fi
+              for tag in "${EXTRA_TAGS[@]}"; do
+                docker tag "${BASE_NAME}:${BUILD_TAG}" "${BASE_NAME}:${tag}"
+                docker push "${BASE_NAME}:${tag}"
+                echo "Pushed ${BASE_NAME}:${tag}"
+              done
+  branches:
+    main:
+      - step: *docker-build-push
+  tags:
+    v*:
+      - step: *docker-build-push
+  custom:
+    'Build & Push Docker Image':
+      - step: *docker-build-push
