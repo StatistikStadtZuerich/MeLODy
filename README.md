@@ -8,6 +8,8 @@ Das Projekt SSZ Statistics Bot V1.0 ist darauf ausgelegt, einen LLM Bot wie Chat
 übersetzt Benutzeranfragen in API-Anfragen, welche daraufhin die Daten verarbeiten und zurücksenden. ChatGPT analysiert
 die Antwort, übersetzt sie in verständliche Worte und kann damit weiterarbeiten.
 
+[Link to ChatGPT Bot](https://chatgpt.com/g/g-aYX0gwmTK-ssz-statistics-bot-v1-0)
+
 ## Optimierung für ChatGPT
 
 Damit ChatGPT effektiv arbeiten kann, sind klare und präzise Endpunkte und Parameter erforderlich. Hier sind einige
