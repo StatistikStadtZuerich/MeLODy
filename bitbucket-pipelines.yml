@@ -10,7 +10,7 @@ definitions:
           - docker
         script:
           - docker info
-          - BASE_NAME="${PRIVATE_DOCKER_REGISTRY_URL}/rax/${BITBUCKET_REPO_SLUG}"
+          - BASE_NAME="${PRIVATE_DOCKER_REGISTRY_URL}/ssz/${BITBUCKET_REPO_SLUG}"
           - BUILD_TAG="build${BITBUCKET_BUILD_NUMBER}_${BITBUCKET_COMMIT:0:7}"
           - docker build -t "${BASE_NAME}:${BUILD_TAG}"
             --build-arg PORT=3001
@@ -31,7 +31,7 @@ definitions:
               (cd app && npm version "${BITBUCKET_TAG#v}")
             fi
           - docker login -u ${PRIVATE_DOCKER_REGISTRY_USER} --password-stdin ${PRIVATE_DOCKER_REGISTRY_URL} <<<"${PRIVATE_DOCKER_REGISTRY_PASS}"
-          - BASE_NAME="${PRIVATE_DOCKER_REGISTRY_URL}/rax/${BITBUCKET_REPO_SLUG}"
+          - BASE_NAME="${PRIVATE_DOCKER_REGISTRY_URL}/ssz/${BITBUCKET_REPO_SLUG}"
           - BUILD_TAG="build${BITBUCKET_BUILD_NUMBER}_${BITBUCKET_COMMIT:0:7}"
           - BASE_VERSION="$(jq -r '.version' package.json)"
           - docker build -t "${BASE_NAME}:${BUILD_TAG}"
