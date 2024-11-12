@@ -14,7 +14,7 @@ pipelines:
           - docker
         script:
           - docker info
-          - docker build -t ssz-statistics-bot .
+          - docker build -t ssz-statistics-bot --build-arg PORT=3001 --build-arg BASE_URI=http://localhost .
   pull-requests:
     '**':
       - step: &docker-build-push
