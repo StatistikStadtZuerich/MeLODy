@@ -43,7 +43,7 @@ Hier sind einige Beispielanfragen, die gut funktionieren:
 - **Titel:** SSZ ChatGPT Prototype
 - **Version:** 1.0.0
 - **Beschreibung:** API description
-- **Basis-URL:** [https://dc61-185-165-60-71.ngrok-free.app/api/v1](https://dc61-185-165-60-71.ngrok-free.app/api/v1)
+- **Basis-URL:** /api/v1
 
 ### Verfügbare Endpunkte und Parameter
 
