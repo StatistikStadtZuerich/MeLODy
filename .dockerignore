@@ -6,3 +6,6 @@ Dockerfile
 nodemon.json
 .env*
 .DS_Store
+README.md
+dist
+swagger.yaml

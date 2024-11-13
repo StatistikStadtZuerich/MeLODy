@@ -21,7 +21,8 @@
     "ml-kmeans": "^6.0.0",
     "strip-bom-stream": "^5.0.0",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
@@ -31,7 +32,6 @@
     "@types/yamljs": "^0.2.34",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3",
-    "yamljs": "^0.3.0"
+    "typescript": "^5.6.3"
   }
 }
