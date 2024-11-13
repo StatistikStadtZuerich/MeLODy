@@ -131,6 +131,18 @@ export interface DemographicDataRequest {
  *           enum: ['Schweizer*in', 'Ausländer*in']
  *           description: The origin for filtering data
  *           example: 'Schweizer*in'
+ *         population:
+ *           type: integer
+ *           description: The population size for filtering data
+ *           example: 10000
+ *         minPopulation:
+ *           type: integer
+ *           description: The minimum population size for filtering data
+ *           example: 5000
+ *         maxPopulation:
+ *           type: integer
+ *           description: The maximum population size for filtering data
+ *           example: 20000
  *         groupBy:
  *           type: array
  *           items:
@@ -146,7 +158,8 @@ export interface DemographicDataRequest {
  *             - age
  *             - age5
  *             - age10
- *             - age 20
+ *             - age20
+ *             - population
  */
 export interface DemographicDataRequestQueryFilter {
     startYear?: number;
@@ -156,6 +169,9 @@ export interface DemographicDataRequestQueryFilter {
     minAge?: number;
     maxAge?: number;
     age?: number;
+    population?: number;
+    minPopulation?: number;
+    maxPopulation?: number;
     kreis?: number;
     quar?: string;
     herkunft?: 'Schweizer*in' | 'Ausländer*in';

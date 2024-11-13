@@ -2,7 +2,7 @@ import {Router} from "express";
 import {sszDataFetcher} from "../services/sszDataFetcher";
 import {IncomeData} from "../models/incomeData";
 import {applyPagination, dataResponse} from "../utils/routeUtils";
-import {groupDataByQueryParamsWithValues, sortData} from "../utils/dataUtils";
+import {groupDataByQueryParamsCombined, sortData} from "../utils/dataUtils";
 import {bodyToIncomeDataRequest, filterIncomeData} from "../utils/incomeDataUtils";
 
 const sszDataUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=af01ed91-04f8-445b-8dfc-04cbf0a27e95&limit=1000000";
@@ -14,7 +14,7 @@ sszDataFetcher<IncomeData>(sszDataUrl).then(result => {
 const router = Router();
 
 /**
- * @swagger
+ // * @swagger
  * /income:
  *   get:
  *     summary: Retrieve income data with filtering
@@ -215,7 +215,7 @@ router.post('/', async (req, res) => {
             res.status(404).json({message: 'No subroutes specified'});
             return;
         }
-        const groupedData = groupDataByQueryParamsWithValues(filteredData, subroutes);
+        const groupedData = groupDataByQueryParamsCombined(filteredData, subroutes, false);
         res.json(groupedData);
     } catch (error) {
         console.error('An error occurred:', error);
