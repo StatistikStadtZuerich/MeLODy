@@ -310,56 +310,18 @@ export const queryToSimpleSelectionCriteria = <T>(req: Request): SimpleSelection
 
 export const bodyToSimpleSelectionCriteria = <T>(body: Partial<SimpleSelectionCriteria>): SimpleSelectionCriteria => createSimpleSelectionCriteria(body);
 
-
-export const groupDataByQueryParams = <T extends Record<string, any>>(data: T[], subroutes: string[]): {
-    keys: string[],
-    result: Record<string, any>,
-    total: number
-} => {
-    const dataKeys = subroutes
-        .filter(key => data.some(item => key in item))
-        .map(key => key as keyof T);
-
-    const result: Record<string, any> = {};
-
-    data.forEach(item => {
-        let currentLevel = result;
-        for (let i = 0; i < dataKeys.length; i++) {
-            const key = dataKeys[i];
-            const keyValue = item[key];
-
-            if (keyValue === undefined || keyValue === null) {
-                continue;
-            }
-
-            if (!currentLevel[keyValue]) {
-                currentLevel[keyValue] = i === dataKeys.length - 1 ? 0 : {};
-            }
-
-            if (i === dataKeys.length - 1) {
-                currentLevel[keyValue] += 1;
-            } else {
-                currentLevel = currentLevel[keyValue];
-            }
-        }
-    });
-
-    return {
-        keys: dataKeys as string[],
-        total: sumNumericValues(result),
-        result
-    };
-};
-
-export const groupDataByQueryParamsWithValues = <T extends Record<string, any>>(
+export const groupDataByQueryParamsCombined = <T extends Record<string, any>>(
     data: T[],
-    subroutes: string[]
+    subroutes: string[],
+    sumArrays: boolean = true
 ): {
     keys: string[];
     result: any;
     total: number;
 } => {
-    const dataKeys = subroutes.filter((key) => data.some((item) => key in item));
+    const dataKeys = subroutes
+        .filter((key) => data.some((item) => key in item))
+        .map((key) => key as keyof T);
 
     const result: any = {};
 
@@ -380,24 +342,31 @@ export const groupDataByQueryParamsWithValues = <T extends Record<string, any>>(
                 }
                 currentLevel = currentLevel[keyValue];
             } else {
-                if (!currentLevel._values) {
-                    currentLevel._values = new Set();
+                if (isNumber(keyValue)) {
+                    if (!currentLevel._values) {
+                        currentLevel._values = [];
+                    }
+                    currentLevel._values.push(numberOrUndefined(keyValue)!);
+                } else {
+                    if (!currentLevel[keyValue]) {
+                        currentLevel[keyValue] = 0;
+                    }
+                    currentLevel[keyValue] += 1;
                 }
-                currentLevel._values.add(keyValue);
             }
         }
     });
 
-    const cleanResult = transformResult(result);
+    const cleanResult = transformResultCombined(result, sumArrays);
 
     return {
-        keys: dataKeys,
-        total: Object.keys(cleanResult).length,
+        keys: dataKeys as string[],
+        total: sumNumericValues(cleanResult),
         result: cleanResult,
     };
 };
 
-function transformResult(obj: any): any {
+function transformResultCombined(obj: any, sumArrays: boolean = true): any {
     if (typeof obj !== 'object' || obj === null) {
         return obj;
     }
@@ -407,29 +376,37 @@ function transformResult(obj: any): any {
         if (valuesArray.length === 1) {
             return valuesArray[0];
         } else {
-            return valuesArray;
+            if (sumArrays) {
+                return (valuesArray as number[]).reduce((acc, val) => acc + val, 0);
+            } else {
+                return valuesArray;
+            }
         }
     }
 
     const keys = Object.keys(obj).filter((key) => key !== '_values');
 
     for (const key of keys) {
-        obj[key] = transformResult(obj[key]);
+        obj[key] = transformResultCombined(obj[key], sumArrays);
     }
 
     return obj;
 }
 
-export const sumNumericValues = (obj: Record<string, any>): number => {
-
-    const recursiveSum = (input: any): number => {
-        if (isNumber(input)) {
-            return input;
-        } else if (input && typeof input === 'object') {
-            return Object.values(input).reduce((acc: number, value: unknown) => acc + recursiveSum(value), 0);
+function sumNumericValues(obj: any): number {
+    if (typeof obj === 'number') {
+        return obj;
+    } else if (Array.isArray(obj)) {
+        return obj.length;
+    } else if (typeof obj === 'object') {
+        let sum = 0;
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                sum += sumNumericValues(obj[key]);
+            }
         }
+        return sum;
+    } else {
         return 0;
-    };
-
-    return recursiveSum(obj);
-};
+    }
+}

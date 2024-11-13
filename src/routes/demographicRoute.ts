@@ -9,7 +9,7 @@ import {
     mapQueryToDemographicDataRequest,
     reqToDemographicData
 } from "../utils/demographicDataUtils";
-import {groupDataByQueryParams, queryToSimpleSelectionCriteria} from "../utils/dataUtils";
+import {groupDataByQueryParamsCombined, queryToSimpleSelectionCriteria} from "../utils/dataUtils";
 import {DemographicDataArrayResponse, DemographicDataSingleResponse} from "../models/response/DemographicDataResponse";
 
 const sszDataUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=b2abdef7-3e3f-4883-8033-6787a1561987&limit=1000000";
@@ -237,7 +237,10 @@ router.post('/', (req: Request, res: Response) => {
     const query = bodyToDemographicDataRequest(req)
     const filteredData = demographicDataFiltered(query, data)
 
-    const subroutes = query.groupBy || [];
+    let subroutes = query.groupBy || [];
+    if (!subroutes.includes('AnzBestWir')) {
+        subroutes.push('AnzBestWir');
+    }
 
     if (filteredData.length === 0) {
         res.status(404).json({message: 'No data found for the specified parameters'});
@@ -246,7 +249,7 @@ router.post('/', (req: Request, res: Response) => {
         res.status(404).json({message: 'No subroutes specified'});
         return;
     }
-    const groupedData = groupDataByQueryParams(filteredData, subroutes);
+    const groupedData = groupDataByQueryParamsCombined(filteredData, subroutes);
     res.json(groupedData);
 });
 
@@ -267,6 +270,7 @@ router.post('/', (req: Request, res: Response) => {
  *       - `age5`(5-year intervals)
  *       - `age10`(10-year intervals)
  *       - `age20`(20-year intervals)
+ *       - `population`
  *
  *     parameters:
  *       - in: query
@@ -358,7 +362,7 @@ router.get('/groupby/*', (req: Request, res: Response) => {
         res.status(404).json({message: 'No subroutes specified'});
         return;
     }
-    const groupedData = groupDataByQueryParams(filteredData, subroutes);
+    const groupedData = groupDataByQueryParamsCombined(filteredData, [...subroutes, 'AnzBestWir']);
     res.json(groupedData);
 });
 

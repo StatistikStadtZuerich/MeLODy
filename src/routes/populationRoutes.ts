@@ -1,7 +1,7 @@
 import {PopulationData} from "../models/populationData";
 import {Router} from "express";
 import {sszDataFetcher} from "../services/sszDataFetcher";
-import {groupDataByQueryParamsWithValues} from "../utils/dataUtils";
+import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
 
 const populationQueryUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=9bacf5c9-a8c0-416d-a162-3b5f0a2d300d&limit=1000";
 let results: PopulationData[] = [];
@@ -102,7 +102,7 @@ router.get('/', async (req, res) => {
 
 
     if (filteredResults.length > 0) {
-        const resValues = groupDataByQueryParamsWithValues(filteredResults, ['StichtagDatJahr', 'AnzBestWir'])
+        const resValues = groupDataByQueryParamsCombined(filteredResults, ['StichtagDatJahr', 'AnzBestWir'])
         res.status(200).json(resValues)
     } else {
         res.status(404).json({error: 'No data found for the specified parameters'});

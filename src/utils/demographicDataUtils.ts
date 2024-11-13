@@ -30,6 +30,9 @@ export const demographicDataFiltered = (req: DemographicDataRequestQueryFilter, 
         minAge,
         maxAge,
         sex,
+        population,
+        minPopulation,
+        maxPopulation,
         herkunft
     } = req;
     if (Object.values(req).every(value => value === undefined)) {
@@ -76,8 +79,20 @@ export const demographicDataFiltered = (req: DemographicDataRequestQueryFilter, 
         if (sex && !(d.SexKurz.toLowerCase() === sex.toString().toLowerCase())) {
             return false;
         }
-        if (herkunft && !(d.HerkunftLang.toLowerCase().includes(origin.toString().toLowerCase()) || d.HerkunftCd === origin)) {
+        if (herkunft && !(d.HerkunftLang.toLowerCase().includes(herkunft.toString().toLowerCase()) || d.HerkunftCd === herkunft)) {
             return false;
+        }
+        if (isNumber(d.AnzBestWir) && (population || minPopulation || maxPopulation)) {
+            const populationInt = intOrUndefined(d.AnzBestWir)!;
+            if (population && populationInt !== population) {
+                return false;
+            } else if (minPopulation && maxPopulation && populationInt < minPopulation || populationInt > maxPopulation!) {
+                return false;
+            } else if (minPopulation && !maxPopulation && populationInt < minPopulation) {
+                return false;
+            } else if (maxPopulation && !minPopulation && populationInt > maxPopulation) {
+                return false;
+            }
         }
         return true;
     });
@@ -116,7 +131,8 @@ export const demographicKeyMap: Record<string, keyof DemographicData> = {
     age: "AlterVCd",
     age5: 'AlterV05Cd',
     age10: 'AlterV10Cd',
-    age20: 'AlterV20Cd'
+    age20: 'AlterV20Cd',
+    population: 'AnzBestWir'
 }
 
 export const mapQueryToDemographicDataRequest = (req: Request): DemographicDataRequestQueryFilter => {
@@ -131,6 +147,9 @@ export const mapQueryToDemographicDataRequest = (req: Request): DemographicDataR
         maxAge,
         sex,
         herkunft,
+        population,
+        minPopulation,
+        maxPopulation,
         groupBy = []
     } = req.query;
 
@@ -146,6 +165,9 @@ export const mapQueryToDemographicDataRequest = (req: Request): DemographicDataR
         maxAge: intOrUndefined(maxAge),
         sex: sexString(sex),
         herkunft: herkunftsString(herkunft),
+        population: intOrUndefined(population),
+        minPopulation: intOrUndefined(minPopulation),
+        maxPopulation: intOrUndefined(maxPopulation),
         groupBy: (groupBy as string[]).map(item => demographicKeyMap[item]).filter(Boolean)
         // responseKeys: responseKeys ? (responseKeys as string[]).map(key => key.toString()) : [],
         // groupBy: groupBy?.toString()?.trim() as keyof DemographicData | undefined
@@ -164,6 +186,9 @@ export const bodyToDemographicDataRequest = (req: Request): DemographicDataReque
         maxAge,
         sex,
         herkunft,
+        population,
+        minPopulation,
+        maxPopulation,
         groupBy = []
     } = req.body || {};
 
@@ -178,6 +203,9 @@ export const bodyToDemographicDataRequest = (req: Request): DemographicDataReque
         maxAge: intOrUndefined(maxAge),
         sex: sexString(sex),
         herkunft: herkunftsString(herkunft),
+        population: intOrUndefined(population),
+        minPopulation: intOrUndefined(minPopulation),
+        maxPopulation: intOrUndefined(maxPopulation),
         groupBy: (groupBy as string[]).map(item => demographicKeyMap[item]).filter(Boolean)
         // responseKeys: responseKeys ? (responseKeys as string[]).map(key => key.toString()) : [],
         // groupBy: groupBy?.toString()?.trim() as keyof DemographicData | undefined
