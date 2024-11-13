@@ -12,7 +12,7 @@ definitions:
           - docker info
           - BASE_NAME="${PRIVATE_DOCKER_REGISTRY_URL}/ssz/${BITBUCKET_REPO_SLUG}"
           - BUILD_TAG="build${BITBUCKET_BUILD_NUMBER}_${BITBUCKET_COMMIT:0:7}"
-          - docker build -t "${BASE_NAME}:${BUILD_TAG}"
+          - docker build --pull -t "${BASE_NAME}:${BUILD_TAG}"
             --build-arg PORT=3001
             --build-arg BASE_URI=http://localhost
             .
@@ -34,7 +34,7 @@ definitions:
           - BASE_NAME="${PRIVATE_DOCKER_REGISTRY_URL}/ssz/${BITBUCKET_REPO_SLUG}"
           - BUILD_TAG="build${BITBUCKET_BUILD_NUMBER}_${BITBUCKET_COMMIT:0:7}"
           - BASE_VERSION="$(jq -r '.version' package.json)"
-          - docker build -t "${BASE_NAME}:${BUILD_TAG}"
+          - docker build --pull -t "${BASE_NAME}:${BUILD_TAG}"
             .
           - docker push "${BASE_NAME}:${BUILD_TAG}"
           - |
