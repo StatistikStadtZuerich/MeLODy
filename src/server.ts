@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => {
     console.log(`[server]: Server is running at ${baseDestination}`);
-    console.log(`[server]: Swagger UI is running at ${baseDestination}/api-docs`);
+    console.log(`[server]: Swagger UI is running at ${fullPublicPath}/swagger`);
     console.log(`[server]: Swagger YAML is running at ${fullPath}/swagger.yaml`);
     if (publicURI) {
         console.log(`[server]: Server exposed at ${publicURI}`)
