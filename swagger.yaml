@@ -5,8 +5,14 @@ info:
   description: 'API description'
 servers:
   - url: 'https://ccb3-89-26-109-33.ngrok-free.app/api/v2'
-      description: 'API server'
+    description: 'API server'
 paths:
+  /apartments:
+    post:
+      summary: 'Filter and group apartment data'
+      operationId: filterAndGroupApartmentData
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ApartmentDataRequest' } } } }
+      responses: { '200': { description: 'Filtered and optionally grouped apartment data', content: { application/json: { schema: { type: object, properties: { keys: { type: array, items: { type: string } }, total: { type: integer }, result: { type: object } } } } } }, '404': { description: 'No data found for the specified parameters', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
   /demographics:
     post:
       summary: 'Retrieve demographic data with filtering and grouping'
@@ -45,6 +51,9 @@ components:
       type: object
       properties: { _id: { type: integer, description: 'The unique identifier for the population data' }, StichtagDatJahr: { type: string, description: 'The year of the population data' }, AnzBestWir: { type: integer, description: 'The number of people' } }
       required: [ _id, StichtagDatJahr, AnzBestWir ]
+    ApartmentDataRequest:
+      type: object
+      properties: { startYear: { type: integer, example: 2020 }, endYear: { type: integer, example: 2025 }, year: { type: integer, example: 2021 }, quar: { type: string, example: Rathaus }, kreis: { type: integer, example: 1, minimum: 1, maximum: 12 }, minRooms: { type: integer, example: 1, minimum: 1 }, maxRooms: { type: integer, example: 5, minimum: 1 }, rooms: { type: integer, example: 3, minimum: 1 }, owner: { type: string, enum: [ 'Öffentliche Hand', 'Übrige private Gesellschaften', 'Natürliche Personen', 'Im Stockwerkeigentum', Wohnbaugenossenschaften ], example: 'Natürliche Personen' }, numberOfApartments: { type: integer, example: 100, minimum: 1, maximum: 1000 }, groupBy: { type: array, items: { type: string }, example: [ StichtagDatJahr, DatenstandCd, QuarLang, KreisLang, EigentuemerSSZPubl1Lang, AnzZimmerLevel2Lang_noDM, AnzWhgStat ] } }
     DemographicDataRequest:
       type: object
       properties: { startYear: { type: [ string, number ], description: 'The starting year for filtering data' }, endYear: { type: [ string, number ], description: 'The ending year for filtering data' }, year: { type: [ string, number ], description: 'A specific year for filtering data' }, Kreis: { type: string, description: 'The district for filtering data' }, Quar: { type: string, description: 'The neighborhood for filtering data' }, Alter: { type: string, description: 'The age category for filtering data' }, Sex: { type: string, description: 'The gender for filtering data' }, Herkunft: { type: string, description: 'The origin for filtering data' }, minResidents: { type: [ string, number ], description: 'The minimum number of residents for filtering data' }, maxResidents: { type: [ string, number ], description: 'The maximum number of residents for filtering data' }, groupBy: { type: string, enum: [ AlterVCd, AlterVKurz, AlterV05Sort, AlterV05Cd, AlterV05Kurz, AlterV10Cd, AlterV10Kurz, AlterV20Cd, AlterV20Kurz, SexLang, SexKurz, KreisLang, QuarLang, HerkunftLang ], description: 'A key of DemographicData to group the results by' } }
