@@ -14,7 +14,7 @@ app.use(express.json());
 
 const port = process.env.PORT;
 const baseURI = process.env.BASE_URI;
-const basePath = process.env.BASE_PATH;
+const basePath = process.env.BASE_PATH || '/api/v2';
 const publicURI = process.env.PUBLIC_URI;
 
 if (!port || !baseURI || !basePath) {
@@ -33,7 +33,6 @@ const router = initRouter;
 router.use("/swagger", swaggerInit, swaggerUiInit(fullPublicPath));
 
 app.use(basePath, router)
-
 
 app.get('/', (req, res) => {
     res.send('Express + TypeScript Server. Hello World');

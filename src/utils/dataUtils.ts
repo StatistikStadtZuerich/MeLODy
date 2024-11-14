@@ -3,6 +3,8 @@ import {YearRange} from "../models/yearRange";
 import {SelectionCriteria, SimpleSelectionCriteria} from "../models/SelectionCriteria";
 import {Request} from 'express';
 import {ResultType, ResultTypeWithArrays, ResultTypeWithMatrix} from "../models/response/results";
+import {defaultTransformationOptions, TransformationOptions} from "../models/transformationOptions";
+import {createStatisticalSummaries} from "./statisticalDataUtils";
 
 
 export const sortData = <T extends object>(data: T[], sortBy: string | undefined, sortAsc: boolean = true) => {
@@ -313,7 +315,7 @@ export const bodyToSimpleSelectionCriteria = <T>(body: Partial<SimpleSelectionCr
 export const groupDataByQueryParamsCombined = <T extends Record<string, any>>(
     data: T[],
     subroutes: string[],
-    sumArrays: boolean = true
+    options: TransformationOptions = defaultTransformationOptions
 ): {
     keys: string[];
     result: any;
@@ -357,7 +359,7 @@ export const groupDataByQueryParamsCombined = <T extends Record<string, any>>(
         }
     });
 
-    const cleanResult = transformResultCombined(result, sumArrays);
+    const cleanResult = transformResultCombined(result, options);
 
     return {
         keys: dataKeys as string[],
@@ -366,7 +368,7 @@ export const groupDataByQueryParamsCombined = <T extends Record<string, any>>(
     };
 };
 
-function transformResultCombined(obj: any, sumArrays: boolean = true): any {
+function transformResultCombined(obj: any, options: TransformationOptions = defaultTransformationOptions): any {
     if (typeof obj !== 'object' || obj === null) {
         return obj;
     }
@@ -376,8 +378,10 @@ function transformResultCombined(obj: any, sumArrays: boolean = true): any {
         if (valuesArray.length === 1) {
             return valuesArray[0];
         } else {
-            if (sumArrays) {
+            if (options.sum) {
                 return (valuesArray as number[]).reduce((acc, val) => acc + val, 0);
+            } else if (options.statisticalSummaries) {
+                return createStatisticalSummaries(valuesArray as number[])
             } else {
                 return valuesArray;
             }
@@ -387,11 +391,12 @@ function transformResultCombined(obj: any, sumArrays: boolean = true): any {
     const keys = Object.keys(obj).filter((key) => key !== '_values');
 
     for (const key of keys) {
-        obj[key] = transformResultCombined(obj[key], sumArrays);
+        obj[key] = transformResultCombined(obj[key], options);
     }
 
     return obj;
 }
+
 
 function sumNumericValues(obj: any): number {
     if (typeof obj === 'number') {

@@ -215,7 +215,7 @@ router.post('/', async (req, res) => {
             res.status(404).json({message: 'No subroutes specified'});
             return;
         }
-        const groupedData = groupDataByQueryParamsCombined(filteredData, subroutes, false);
+        const groupedData = groupDataByQueryParamsCombined(filteredData, subroutes, {statisticalSummaries: true});
         res.json(groupedData);
     } catch (error) {
         console.error('An error occurred:', error);

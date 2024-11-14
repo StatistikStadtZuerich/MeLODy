@@ -102,7 +102,7 @@ router.get('/', async (req, res) => {
 
 
     if (filteredResults.length > 0) {
-        const resValues = groupDataByQueryParamsCombined(filteredResults, ['StichtagDatJahr', 'AnzBestWir'])
+        const resValues = groupDataByQueryParamsCombined(filteredResults, ['StichtagDatJahr', 'AnzBestWir'], {sum: true})
         res.status(200).json(resValues)
     } else {
         res.status(404).json({error: 'No data found for the specified parameters'});

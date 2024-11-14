@@ -1,78 +1,87 @@
 openapi: 3.1.0
 info:
-    title: 'SSZ ChatGPT Prototype'
-    version: 1.0.0
-    description: 'API description'
+  title: 'SSZ ChatGPT Prototype'
+  version: 1.0.0
+  description: 'API description'
 servers:
-    -
-        url: 'http://localhost:3000/api/v1'
-        description: 'API server'
+  - url: 'https://ccb3-89-26-109-33.ngrok-free.app/api/v2'
+      description: 'API server'
 paths:
-    /demographics:
-        post:
-            summary: 'Retrieve demographic data with filtering and grouping'
-            operationId: getDemographicData
-            requestBody: {content: {application/json: {schema: {$ref: '#/components/schemas/DemographicDataRequestQueryFilter'}}}}
-            responses: {'200': {description: 'Successfully retrieved and grouped demographic data', content: {application/json: {schema: {type: object, properties: {result: {type: object, additionalProperties: {type: object}, description: 'The grouped demographic data'}, keys: {type: array, items: {type: string}, description: 'The keys used for grouping the data'}, total: {type: integer, description: 'The total number of records found'}}}}}}, '404': {description: 'No data found for the specified parameters or no groupBy specified'}}
-    /income:
-        post:
-            summary: 'Retrieve grouped income data based on filters and grouping parameters'
-            operationId: postIncomeData
-            requestBody: {content: {application/json: {schema: {$ref: '#/components/schemas/IncomeDataRequest'}}}}
-            responses: {'200': {description: 'A grouped set of income data', content: {application/json: {schema: {type: object, properties: {keys: {type: array, items: {type: string}}, result: {type: object}, total: {type: integer}}}}}}, '404': {description: 'No data found for the specified parameters or no subroutes specified'}, '500': {description: 'Internal Server Error'}}
-    /population:
-        get:
-            summary: 'Retrieve population data'
-            description: 'Retrieve population data based on various filters such as year, startYear, endYear, minPopulation, maxPopulation.'
-            operationId: getPopulationNumbers
-            parameters: [{in: query, name: year, schema: {type: string}, description: 'Filter by specific year'}, {in: query, name: startYear, schema: {type: string}, description: 'Filter by start year'}, {in: query, name: endYear, schema: {type: string}, description: 'Filter by end year'}, {in: query, name: minPopulation, schema: {type: integer}, description: 'Filter by minimum population'}, {in: query, name: maxPopulation, schema: {type: integer}, description: 'Filter by maximum population'}]
-            responses: {'200': {description: 'A list of population data', content: {application/json: {schema: {type: object, properties: {total: {type: integer, description: 'The total number of population records'}, returned: {type: integer, description: 'The number of population records returned'}, data: {type: array, items: {$ref: '#/components/schemas/PopulationData'}}}}}}}, '404': {description: 'No data found for the specified parameters', content: {application/json: {schema: {type: object, properties: {error: {type: string, example: 'No data found for the specified parameters'}}}}}}}
+  /demographics:
+    post:
+      summary: 'Retrieve demographic data with filtering and grouping'
+      operationId: getDemographicData
+      requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/DemographicDataRequestQueryFilter' } } } }
+      responses: { '200': { description: 'Successfully retrieved and grouped demographic data', content: { application/json: { schema: { type: object, properties: { result: { type: object, additionalProperties: { type: object }, description: 'The grouped demographic data' }, keys: { type: array, items: { type: string }, description: 'The keys used for grouping the data' }, total: { type: integer, description: 'The total number of records found' } } } } } }, '404': { description: 'No data found for the specified parameters or no groupBy specified' } }
+  /income:
+    post:
+      summary: 'Retrieve grouped income data based on filters and grouping parameters'
+      operationId: postIncomeData
+      requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/IncomeDataRequest' } } } }
+      responses: { '200': { description: 'A grouped set of income data', content: { application/json: { schema: { type: object, properties: { keys: { type: array, items: { type: string } }, result: { type: object }, total: { type: integer } } } } } }, '404': { description: 'No data found for the specified parameters or no subroutes specified' }, '500': { description: 'Internal Server Error' } }
+  /mietpreise:
+    post:
+      summary: 'Fetch and filter Mietpreis data'
+      description: 'Fetches Mietpreis data based on the given filter criteria and optionally groups the data.'
+      operationId: fetchMietpreisData
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MietpreisDataRequest' } } } }
+      responses: { '200': { description: 'Successful response with Mietpreis data.', content: { application/json: { schema: { type: array, items: { type: object } } } } }, '400': { description: 'Bad request.' }, '404': { description: 'No data found for the specified parameters.' } }
+  /population:
+    get:
+      summary: 'Retrieve population data'
+      description: 'Retrieve population data based on various filters such as year, startYear, endYear, minPopulation, maxPopulation.'
+      operationId: getPopulationNumbers
+      parameters: [ { in: query, name: year, schema: { type: string }, description: 'Filter by specific year' }, { in: query, name: startYear, schema: { type: string }, description: 'Filter by start year' }, { in: query, name: endYear, schema: { type: string }, description: 'Filter by end year' }, { in: query, name: minPopulation, schema: { type: integer }, description: 'Filter by minimum population' }, { in: query, name: maxPopulation, schema: { type: integer }, description: 'Filter by maximum population' } ]
+      responses: { '200': { description: 'A list of population data', content: { application/json: { schema: { type: object, properties: { total: { type: integer, description: 'The total number of population records' }, returned: { type: integer, description: 'The number of population records returned' }, data: { type: array, items: { $ref: '#/components/schemas/PopulationData' } } } } } } }, '404': { description: 'No data found for the specified parameters', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
 components:
-    schemas:
-        DemographicData:
-            type: object
-            properties: {_id: {type: integer, description: 'Unique identifier for the demographic data record', example: 100}, StichtagDatJahr: {type: string, description: 'Year of the record', example: '1993'}, AlterVSort: {type: string, description: 'Sort order for age category', example: '0'}, AlterVCd: {type: string, description: 'Age category code', example: '0'}, AlterVKurz: {type: string, description: 'Short description of age category', example: '0'}, AlterV05Sort: {type: string, description: 'Sort order for age category (5-year groups)', example: '1'}, AlterV05Cd: {type: string, description: 'Age category code (5-year groups)', example: '0'}, AlterV05Kurz: {type: string, description: 'Short description of age category (5-year groups)', example: 0-4}, AlterV10Cd: {type: string, description: 'Age category code (10-year groups)', example: '0'}, AlterV10Kurz: {type: string, description: 'Short description of age category (10-year groups)', example: 0-9}, AlterV20Cd: {type: string, description: 'Age category code (20-year groups)', example: '0'}, AlterV20Kurz: {type: string, description: 'Short description of age category (20-year groups)', example: 0-19}, SexCd: {type: string, description: 'Gender code', example: '1'}, SexLang: {type: string, description: 'Full description of gender', example: männlich}, SexKurz: {type: string, description: 'Short description of gender', example: M}, KreisCd: {type: string, description: 'District code', example: '7'}, KreisLang: {type: string, description: 'Full description of district', example: 'Kreis 7'}, QuarSort: {type: string, description: 'Sort order for neighborhood', example: '71'}, QuarCd: {type: string, description: 'Neighborhood code', example: '071'}, QuarLang: {type: string, description: 'Full description of neighborhood', example: Fluntern}, HerkunftSort: {type: string, description: 'Sort order for origin', example: '2'}, HerkunftCd: {type: string, description: 'Origin code', example: '2'}, HerkunftLang: {type: string, description: 'Full description of origin', example: 'Ausländer*in'}, AnzBestWir: {type: string, description: 'Number of residents', example: '12'}}
-        IncomeData:
-            type: object
-            properties: {_id: {type: integer, description: 'Unique identifier'}, StichtagDatJahr: {type: string, description: 'Reference year'}, QuarSort: {type: string, description: 'Sort order of the quarter'}, QuarCd: {type: string, description: 'Quarter code'}, QuarLang: {type: string, description: 'Full name of the quarter'}, SteuerTarifSort: {type: string, description: 'Tax tariff sort order'}, SteuerTarifCd: {type: string, description: 'Tax tariff code'}, SteuerTarifLang: {type: string, description: 'Full name of the tax tariff'}, SteuerEinkommen_p50: {type: number, description: 'Median income'}, SteuerEinkommen_p25: {type: number, description: '25th percentile income'}, SteuerEinkommen_p75: {type: number, description: '75th percentile income'}}
-        PopulationData:
-            type: object
-            properties: {_id: {type: integer, description: 'The unique identifier for the population data'}, StichtagDatJahr: {type: string, description: 'The year of the population data'}, AnzBestWir: {type: integer, description: 'The number of people'}}
-            required: [_id, StichtagDatJahr, AnzBestWir]
-        DemographicDataRequest:
-            type: object
-            properties: {startYear: {type: [string, number], description: 'The starting year for filtering data'}, endYear: {type: [string, number], description: 'The ending year for filtering data'}, year: {type: [string, number], description: 'A specific year for filtering data'}, Kreis: {type: string, description: 'The district for filtering data'}, Quar: {type: string, description: 'The neighborhood for filtering data'}, Alter: {type: string, description: 'The age category for filtering data'}, Sex: {type: string, description: 'The gender for filtering data'}, Herkunft: {type: string, description: 'The origin for filtering data'}, minResidents: {type: [string, number], description: 'The minimum number of residents for filtering data'}, maxResidents: {type: [string, number], description: 'The maximum number of residents for filtering data'}, groupBy: {type: string, enum: [AlterVCd, AlterVKurz, AlterV05Sort, AlterV05Cd, AlterV05Kurz, AlterV10Cd, AlterV10Kurz, AlterV20Cd, AlterV20Kurz, SexLang, SexKurz, KreisLang, QuarLang, HerkunftLang], description: 'A key of DemographicData to group the results by'}}
-        DemographicDataRequestQueryFilter:
-            type: object
-            properties: {startYear: {type: integer, description: 'The starting year for filtering data', example: 2000}, endYear: {type: integer, description: 'The ending year for filtering data', example: 2020}, year: {type: integer, description: 'A specific year for filtering data', example: 2010}, sex: {type: string, enum: [M, F], description: 'The gender for filtering data', example: M}, minAge: {type: integer, description: 'The minimum age for filtering data', example: 18, minimum: 0, maximum: 120}, maxAge: {type: integer, description: 'The maximum age for filtering data', example: 65, minimum: 0, maximum: 120}, age: {type: integer, description: 'The specific age for filtering data', example: 30, minimum: 0, maximum: 120}, kreis: {type: integer, description: 'The district for filtering data', example: 1, minimum: 1, maximum: 12}, quar: {type: string, description: 'The neighborhood for filtering data', example: Altstadt}, herkunft: {type: string, enum: ['Schweizer*in', 'Ausländer*in'], description: 'The origin for filtering data', example: 'Schweizer*in'}, population: {type: integer, description: 'The population size for filtering data', example: 10000}, minPopulation: {type: integer, description: 'The minimum population size for filtering data', example: 5000}, maxPopulation: {type: integer, description: 'The maximum population size for filtering data', example: 20000}, groupBy: {type: array, items: {type: string}, description: 'Fields to group the results by', example: [year, sex], enum: [sex, herkunft, year, kreis, quar, age, age5, age10, age20, population]}}
-        IncomeDataRequest:
-            type: object
-            properties: {startYear: {type: integer, description: 'Start year for the income data'}, endYear: {type: integer, description: 'End year for the income data'}, year: {type: integer, description: 'Specific year for the income data'}, quar: {type: string, description: 'Quarter for the income data'}, tarif: {type: string, description: 'Tax tariff'}, taxIncome_p50: {type: number, description: 'Median income'}, taxIncome_p25: {type: number, description: '25th percentile income'}, taxIncome_p75: {type: number, description: '75th percentile income'}, groupBy: {type: array, items: {type: string, enum: [year, quar, tarif, taxIncome_p50, taxIncome_p25, taxIncome_p75]}, description: 'Group by criteria'}}
-        DemographicDataCountResponse:
-            type: object
-            properties: {returned: {type: integer, description: 'The number of items returned'}, yearRange: {$ref: '#/components/schemas/YearRange', description: 'The range of years for the demographic data'}, population: {type: integer, description: 'The population count'}, groupedByValues: {type: array, items: {oneOf: [{type: string}, {type: integer}]}, description: 'Values by which the data is grouped'}, result: {oneOf: [{$ref: '#/components/schemas/ResultType'}, {$ref: '#/components/schemas/ResultTypeWithArrays'}], description: 'The result data'}}
-        DemographicDataPerYearResponse:
-            type: object
-            properties: {returned: {type: integer, description: 'The number of items returned'}, yearRange: {$ref: '#/components/schemas/YearRange', description: 'The range of years for the demographic data'}, population: {type: array, items: {type: integer}, description: 'The population count per year'}, groupedByValues: {type: array, items: {oneOf: [{type: string}, {type: integer}]}, description: 'Values by which the data is grouped'}, result: {oneOf: [{$ref: '#/components/schemas/ResultTypeWithArrays'}, {$ref: '#/components/schemas/ResultTypeWithMatrix'}], description: 'The result data'}}
-        ResultType:
-            type: object
-            properties: {}
-            additionalProperties: {type: object, properties: {}, additionalProperties: {type: number}}
-        ResultTypeWithArrays:
-            type: object
-            properties: {}
-            additionalProperties: {type: object, properties: {}, additionalProperties: {type: array, items: {type: number}}}
-        ResultTypeWithMatrix:
-            type: object
-            properties: {}
-            additionalProperties: {type: object, properties: {}, additionalProperties: {type: array, items: {type: array, items: {type: number}}}}
-        SelectionCriteria:
-            type: object
-            properties: {sortBy: {type: string, description: 'Field to sort by'}, sortAsc: {type: boolean, description: 'Sort in ascending order'}, limit: {type: integer, description: 'Limit the number of results'}, offset: {type: integer, description: 'Offset the results by a certain number'}}
-        SimpleSelectionCriteria:
-            type: object
-            properties: {sortAsc: {type: boolean, description: 'Sort in ascending order'}}
-        YearRange:
-            type: object
-            properties: {startYear: {type: integer}, endYear: {type: integer}, yearsIncluded: {type: array, items: {type: integer}}}
-tags: []
+  schemas:
+    DemographicData:
+      type: object
+      properties: { _id: { type: integer, description: 'Unique identifier for the demographic data record', example: 100 }, StichtagDatJahr: { type: string, description: 'Year of the record', example: '1993' }, AlterVSort: { type: string, description: 'Sort order for age category', example: '0' }, AlterVCd: { type: string, description: 'Age category code', example: '0' }, AlterVKurz: { type: string, description: 'Short description of age category', example: '0' }, AlterV05Sort: { type: string, description: 'Sort order for age category (5-year groups)', example: '1' }, AlterV05Cd: { type: string, description: 'Age category code (5-year groups)', example: '0' }, AlterV05Kurz: { type: string, description: 'Short description of age category (5-year groups)', example: 0-4 }, AlterV10Cd: { type: string, description: 'Age category code (10-year groups)', example: '0' }, AlterV10Kurz: { type: string, description: 'Short description of age category (10-year groups)', example: 0-9 }, AlterV20Cd: { type: string, description: 'Age category code (20-year groups)', example: '0' }, AlterV20Kurz: { type: string, description: 'Short description of age category (20-year groups)', example: 0-19 }, SexCd: { type: string, description: 'Gender code', example: '1' }, SexLang: { type: string, description: 'Full description of gender', example: männlich }, SexKurz: { type: string, description: 'Short description of gender', example: M }, KreisCd: { type: string, description: 'District code', example: '7' }, KreisLang: { type: string, description: 'Full description of district', example: 'Kreis 7' }, QuarSort: { type: string, description: 'Sort order for neighborhood', example: '71' }, QuarCd: { type: string, description: 'Neighborhood code', example: '071' }, QuarLang: { type: string, description: 'Full description of neighborhood', example: Fluntern }, HerkunftSort: { type: string, description: 'Sort order for origin', example: '2' }, HerkunftCd: { type: string, description: 'Origin code', example: '2' }, HerkunftLang: { type: string, description: 'Full description of origin', example: 'Ausländer*in' }, AnzBestWir: { type: string, description: 'Number of residents', example: '12' } }
+    IncomeData:
+      type: object
+      properties: { _id: { type: integer, description: 'Unique identifier' }, StichtagDatJahr: { type: string, description: 'Reference year' }, QuarSort: { type: string, description: 'Sort order of the quarter' }, QuarCd: { type: string, description: 'Quarter code' }, QuarLang: { type: string, description: 'Full name of the quarter' }, SteuerTarifSort: { type: string, description: 'Tax tariff sort order' }, SteuerTarifCd: { type: string, description: 'Tax tariff code' }, SteuerTarifLang: { type: string, description: 'Full name of the tax tariff' }, SteuerEinkommen_p50: { type: number, description: 'Median income' }, SteuerEinkommen_p25: { type: number, description: '25th percentile income' }, SteuerEinkommen_p75: { type: number, description: '75th percentile income' } }
+    PopulationData:
+      type: object
+      properties: { _id: { type: integer, description: 'The unique identifier for the population data' }, StichtagDatJahr: { type: string, description: 'The year of the population data' }, AnzBestWir: { type: integer, description: 'The number of people' } }
+      required: [ _id, StichtagDatJahr, AnzBestWir ]
+    DemographicDataRequest:
+      type: object
+      properties: { startYear: { type: [ string, number ], description: 'The starting year for filtering data' }, endYear: { type: [ string, number ], description: 'The ending year for filtering data' }, year: { type: [ string, number ], description: 'A specific year for filtering data' }, Kreis: { type: string, description: 'The district for filtering data' }, Quar: { type: string, description: 'The neighborhood for filtering data' }, Alter: { type: string, description: 'The age category for filtering data' }, Sex: { type: string, description: 'The gender for filtering data' }, Herkunft: { type: string, description: 'The origin for filtering data' }, minResidents: { type: [ string, number ], description: 'The minimum number of residents for filtering data' }, maxResidents: { type: [ string, number ], description: 'The maximum number of residents for filtering data' }, groupBy: { type: string, enum: [ AlterVCd, AlterVKurz, AlterV05Sort, AlterV05Cd, AlterV05Kurz, AlterV10Cd, AlterV10Kurz, AlterV20Cd, AlterV20Kurz, SexLang, SexKurz, KreisLang, QuarLang, HerkunftLang ], description: 'A key of DemographicData to group the results by' } }
+    DemographicDataRequestQueryFilter:
+      type: object
+      properties: { startYear: { type: integer, description: 'The starting year for filtering data', example: 2000 }, endYear: { type: integer, description: 'The ending year for filtering data', example: 2020 }, year: { type: integer, description: 'A specific year for filtering data', example: 2010 }, sex: { type: string, enum: [ M, F ], description: 'The gender for filtering data', example: M }, minAge: { type: integer, description: 'The minimum age for filtering data', example: 18, minimum: 0, maximum: 120 }, maxAge: { type: integer, description: 'The maximum age for filtering data', example: 65, minimum: 0, maximum: 120 }, age: { type: integer, description: 'The specific age for filtering data', example: 30, minimum: 0, maximum: 120 }, kreis: { type: integer, description: 'The district for filtering data', example: 1, minimum: 1, maximum: 12 }, quar: { type: string, description: 'The neighborhood for filtering data', example: Altstadt }, herkunft: { type: string, enum: [ 'Schweizer*in', 'Ausländer*in' ], description: 'The origin for filtering data', example: 'Schweizer*in' }, population: { type: integer, description: 'The population size for filtering data', example: 10000 }, minPopulation: { type: integer, description: 'The minimum population size for filtering data', example: 5000 }, maxPopulation: { type: integer, description: 'The maximum population size for filtering data', example: 20000 }, groupBy: { type: array, items: { type: string }, description: 'Fields to group the results by', example: [ year, sex ], enum: [ sex, herkunft, year, kreis, quar, age, age5, age10, age20, population ] } }
+    IncomeDataRequest:
+      type: object
+      properties: { startYear: { type: integer, description: 'Start year for the income data' }, endYear: { type: integer, description: 'End year for the income data' }, year: { type: integer, description: 'Specific year for the income data' }, quar: { type: string, description: 'Quarter for the income data' }, tarif: { type: string, description: 'Tax tariff' }, taxIncome_p50: { type: number, description: 'Median income' }, taxIncome_p25: { type: number, description: '25th percentile income' }, taxIncome_p75: { type: number, description: '75th percentile income' }, groupBy: { type: array, items: { type: string, enum: [ year, quar, tarif, taxIncome_p50, taxIncome_p25, taxIncome_p75 ] }, description: 'Group by criteria' } }
+    MietpreisDataRequest:
+      type: object
+      properties: { startYear: { type: integer, description: 'The start year of the request', example: 2020 }, endYear: { type: integer, description: 'The end year of the request', example: 2021 }, year: { type: integer, description: 'A specific year for the request', example: 2022 }, month: { type: integer, description: 'A specific month for the request', example: 8, minimum: 1, maximum: 12 }, startMonth: { type: integer, description: 'The start month of the request', example: 1, minimum: 1, maximum: 12 }, endMonth: { type: integer, description: 'The end month of the request', example: 12, minimum: 1, maximum: 12 }, areaType: { type: string, enum: [ 'Ganze Stadt', Stadtkreise, Stadtquartiere, 'Statistische Quartiere' ], description: 'Type of area', example: 'Ganze Stadt' }, categoryType: { type: string, enum: [ 'Ganze Stadt', 'Neubau bis 2 Jahre', 'Neubezug bis 2 Jahre', 'Bestand Mietverträge 2–10 Jahre', 'Bestand Mietverträge 11-20 Jahre', 'Bestand Mietverträge über 20 Jahre', Kreis ], description: 'Category type of the request', example: 'Neubau bis 2 Jahre' }, kreis: { type: integer, description: 'The kreis value', example: 5, minimum: 1, maximum: 12 }, minNumberOfRooms: { type: integer, description: 'Minimum number of rooms', example: 2, minimum: 1 }, maxNumberOfRooms: { type: integer, description: 'Maximum number of rooms', example: 4, minimum: 1 }, numberOfRooms: { type: integer, description: 'Specific number of rooms', example: 3, minimum: 1 }, gemein: { type: string, enum: [ Gemeinnützig, 'Nicht gemeinnützig' ], description: 'Indicates if it is profit', example: Gemeinnützig }, messung: { type: string, enum: [ Quadratmeter, Wohnung ], description: 'Indicates if it is priced by the whole flat or in square meter', example: Wohnung }, bruttoNetto: { type: string, enum: [ Brutto, Netto ], description: 'Indicates if it is priced in gross or net', example: Brutto }, groupBy: { type: array, items: { type: string, enum: [ StichtagDatJahr, StichtagDatMonat, RaumeinheitLang, GliederungLang, ZimmerLang, GemeinnuetzigLang, EinheitLang, PreisartLang, mean, meanl, meanu, qu10, qu10l, qu10u, qu25, qu25l, qu25u, qu50, qu50l, qu50u, qu75, qu75l, qu75u, qu90, qu90l, qu90u, Domain, Sample1, Sample2 ] }, description: 'Grouping fields', example: [ StichtagDatJahr, ZimmerSort ] } }
+    DemographicDataCountResponse:
+      type: object
+      properties: { returned: { type: integer, description: 'The number of items returned' }, yearRange: { $ref: '#/components/schemas/YearRange', description: 'The range of years for the demographic data' }, population: { type: integer, description: 'The population count' }, groupedByValues: { type: array, items: { oneOf: [ { type: string }, { type: integer } ] }, description: 'Values by which the data is grouped' }, result: { oneOf: [ { $ref: '#/components/schemas/ResultType' }, { $ref: '#/components/schemas/ResultTypeWithArrays' } ], description: 'The result data' } }
+    DemographicDataPerYearResponse:
+      type: object
+      properties: { returned: { type: integer, description: 'The number of items returned' }, yearRange: { $ref: '#/components/schemas/YearRange', description: 'The range of years for the demographic data' }, population: { type: array, items: { type: integer }, description: 'The population count per year' }, groupedByValues: { type: array, items: { oneOf: [ { type: string }, { type: integer } ] }, description: 'Values by which the data is grouped' }, result: { oneOf: [ { $ref: '#/components/schemas/ResultTypeWithArrays' }, { $ref: '#/components/schemas/ResultTypeWithMatrix' } ], description: 'The result data' } }
+    ResultType:
+      type: object
+      properties: { }
+      additionalProperties: { type: object, properties: { }, additionalProperties: { type: number } }
+    ResultTypeWithArrays:
+      type: object
+      properties: { }
+      additionalProperties: { type: object, properties: { }, additionalProperties: { type: array, items: { type: number } } }
+    ResultTypeWithMatrix:
+      type: object
+      properties: { }
+      additionalProperties: { type: object, properties: { }, additionalProperties: { type: array, items: { type: array, items: { type: number } } } }
+    SelectionCriteria:
+      type: object
+      properties: { sortBy: { type: string, description: 'Field to sort by' }, sortAsc: { type: boolean, description: 'Sort in ascending order' }, limit: { type: integer, description: 'Limit the number of results' }, offset: { type: integer, description: 'Offset the results by a certain number' } }
+    SimpleSelectionCriteria:
+      type: object
+      properties: { sortAsc: { type: boolean, description: 'Sort in ascending order' } }
+    YearRange:
+      type: object
+      properties: { startYear: { type: integer }, endYear: { type: integer }, yearsIncluded: { type: array, items: { type: integer } } }
+tags: [ ]

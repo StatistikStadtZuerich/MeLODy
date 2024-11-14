@@ -249,7 +249,7 @@ router.post('/', (req: Request, res: Response) => {
         res.status(404).json({message: 'No subroutes specified'});
         return;
     }
-    const groupedData = groupDataByQueryParamsCombined(filteredData, subroutes);
+    const groupedData = groupDataByQueryParamsCombined(filteredData, subroutes, {sum: true});
     res.json(groupedData);
 });
 

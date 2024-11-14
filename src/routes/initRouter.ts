@@ -3,6 +3,7 @@ import path from "node:path";
 import populationRoutes from "./populationRoutes";
 import incomeRoute from "./incomeRoute";
 import demographicRoute from "./demographicRoute";
+import mietpreisRoute from "./mietpreisRoute";
 
 
 const router = Router();
@@ -20,4 +21,5 @@ router.get('/privacy-policy', (req, res) => {
 router.use("/population", populationRoutes);
 router.use("/income", incomeRoute);
 router.use("/demographics", demographicRoute);
+router.use("/mietpreise", mietpreisRoute);
 export default router;
