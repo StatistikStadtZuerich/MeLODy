@@ -3,6 +3,7 @@ import {intOrUndefined, numberOrUndefined} from "./numberUtils";
 import {IncomeDataRequest} from "../models/request/incomeDataRequest";
 import {toValidString} from "./stringUtils";
 import {IncomeData} from "../models/incomeData";
+import {mapItemsAsKeys} from "./dataUtils";
 
 export const mapQueryToIncomeDataRequest = (req: Request): IncomeDataRequest => {
     const {
@@ -56,9 +57,7 @@ export const bodyToIncomeDataRequest = (req: Request): IncomeDataRequest => {
         taxIncome_p50: numberOrUndefined(taxIncome_p50),
         taxIncome_p25: numberOrUndefined(taxIncome_p25),
         taxIncome_p75: numberOrUndefined(taxIncome_p75),
-        groupBy: (groupBy as string[]).map(item => incomeKeyMap[item]).filter(Boolean)
-        // responseKeys: responseKeys ? (responseKeys as string[]).map(key => key.toString()) : [],
-        // groupBy: groupBy?.toString()?.trim() as keyof DemographicData | undefined
+        groupBy: mapItemsAsKeys(groupBy, incomeKeyMap)
     };
 };
 

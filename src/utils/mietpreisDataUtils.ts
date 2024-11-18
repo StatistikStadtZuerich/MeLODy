@@ -3,6 +3,7 @@ import {Request} from "express";
 import {intOrUndefined, isNumber} from "./numberUtils";
 import {MietpreisData} from "../models/mietpreisData";
 import {parseMonthFromString} from "./dateUtils";
+import {mapItemsAsKeys} from "./dataUtils";
 
 export const mietPreisKeyMap: Record<string, keyof MietpreisData> = {
     year: "StichtagDatJahr",
@@ -69,7 +70,7 @@ export const bodyToMietpreisRequest = (req: Request): MietpreisDataRequest => {
         minNumberOfRooms: intOrUndefined(minNumberOfRooms),
         maxNumberOfRooms: intOrUndefined(maxNumberOfRooms),
         numberOfRooms: intOrUndefined(numberOfRooms),
-        groupBy: (groupBy as string[]).map(item => mietPreisKeyMap[item] || item as keyof MietpreisData).filter(Boolean),
+        groupBy: mapItemsAsKeys(groupBy, mietPreisKeyMap),
         gemein,
         messung,
         bruttoNetto
@@ -77,28 +78,28 @@ export const bodyToMietpreisRequest = (req: Request): MietpreisDataRequest => {
 }
 
 export const filterMietpreisData = (data: MietpreisData[], request: MietpreisDataRequest): MietpreisData[] => {
-    return data.filter(item => {
-        const {
-            startYear,
-            endYear,
-            year,
-            month,
-            startMonth,
-            endMonth,
-            areaType,
-            categoryType,
-            kreis,
-            minNumberOfRooms,
-            maxNumberOfRooms,
-            numberOfRooms,
-            gemein,
-            messung,
-            bruttoNetto,
-        } = request;
+    const {
+        startYear,
+        endYear,
+        year,
+        month,
+        startMonth,
+        endMonth,
+        areaType,
+        categoryType,
+        kreis,
+        minNumberOfRooms,
+        maxNumberOfRooms,
+        numberOfRooms,
+        gemein,
+        messung,
+        bruttoNetto,
+    } = request;
+    const startYearInt = intOrUndefined(startYear);
+    const endYearInt = intOrUndefined(endYear);
+    const yearInt = intOrUndefined(year);
 
-        const startYearInt = intOrUndefined(startYear);
-        const endYearInt = intOrUndefined(endYear);
-        const yearInt = intOrUndefined(year);
+    return data.filter(item => {
 
         const monthAsInt = parseMonthFromString(item.StichtagDatMonat, "yyyy.MM")
 
@@ -115,8 +116,8 @@ export const filterMietpreisData = (data: MietpreisData[], request: MietpreisDat
         }
 
         if (areaType && item.RaumeinheitLang !== areaType) return false;
-        if (categoryType && !item.GemeinnuetzigLang.includes(categoryType)) return false;
-        if (categoryType && categoryType === 'Kreis' && kreis && item.GemeinnuetzigLang !== `${categoryType} ${kreis}`) return false;
+        if (categoryType && !item.GliederungLang.includes(categoryType)) return false;
+        if (categoryType && categoryType === 'Kreis' && kreis && item.GliederungLang !== `${categoryType} ${kreis}`) return false;
 
         if (isNumber(item.ZimmerSort) && (numberOfRooms || minNumberOfRooms || maxNumberOfRooms)) {
             const numberOfRoomsInt = intOrUndefined(item.ZimmerSort)!;

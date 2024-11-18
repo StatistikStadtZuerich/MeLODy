@@ -415,3 +415,5 @@ function sumNumericValues(obj: any): number {
         return 0;
     }
 }
+
+export const mapItemsAsKeys = <T>(items: string[], keyMap: Record<string, keyof T>): (keyof T)[] => items.map((item) => keyMap[item] || item as keyof T).filter(Boolean)

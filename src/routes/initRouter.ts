@@ -5,6 +5,7 @@ import incomeRoute from "./incomeRoute";
 import demographicRoute from "./demographicRoute";
 import mietpreisRoute from "./mietpreisRoute";
 import apartmentRoute from "./apartmentRoute";
+import employmentRoute from "./employmentRoute";
 
 
 const router = Router();
@@ -24,4 +25,6 @@ router.use("/income", incomeRoute);
 router.use("/demographics", demographicRoute);
 router.use("/mietpreise", mietpreisRoute);
 router.use("/apartments", apartmentRoute);
+router.use("/employment", employmentRoute);
+
 export default router;

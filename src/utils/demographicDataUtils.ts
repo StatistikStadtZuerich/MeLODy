@@ -8,6 +8,7 @@ import {
     countOccurrencesForMultipleKeys,
     countOccurrencesPerYearMultipleKeys,
     extractYearRange,
+    mapItemsAsKeys,
     populationPerYear,
     sortKeysBySumOfArrays,
     sortResultEntriesByValues
@@ -168,9 +169,7 @@ export const mapQueryToDemographicDataRequest = (req: Request): DemographicDataR
         population: intOrUndefined(population),
         minPopulation: intOrUndefined(minPopulation),
         maxPopulation: intOrUndefined(maxPopulation),
-        groupBy: (groupBy as string[]).map(item => demographicKeyMap[item]).filter(Boolean)
-        // responseKeys: responseKeys ? (responseKeys as string[]).map(key => key.toString()) : [],
-        // groupBy: groupBy?.toString()?.trim() as keyof DemographicData | undefined
+        groupBy: mapItemsAsKeys(groupBy as string[], demographicKeyMap)
     };
 };
 
@@ -206,9 +205,7 @@ export const bodyToDemographicDataRequest = (req: Request): DemographicDataReque
         population: intOrUndefined(population),
         minPopulation: intOrUndefined(minPopulation),
         maxPopulation: intOrUndefined(maxPopulation),
-        groupBy: (groupBy as string[]).map(item => demographicKeyMap[item]).filter(Boolean)
-        // responseKeys: responseKeys ? (responseKeys as string[]).map(key => key.toString()) : [],
-        // groupBy: groupBy?.toString()?.trim() as keyof DemographicData | undefined
+        groupBy: mapItemsAsKeys(groupBy, demographicKeyMap)
     };
 };
 

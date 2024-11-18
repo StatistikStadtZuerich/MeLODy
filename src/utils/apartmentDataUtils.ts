@@ -2,6 +2,7 @@ import {Request} from 'express';
 import {ApartmentDataRequest} from "../models/request/apartmentDataRequest";
 import {intOrUndefined, isNumber, numberOrUndefined} from "./numberUtils";
 import {ApartmentData} from "../models/ApartmentData";
+import {mapItemsAsKeys} from "./dataUtils";
 
 export const apartmentDataKeyMap: Record<string, keyof ApartmentData> = {
     year: 'StichtagDatJahr',
@@ -39,30 +40,28 @@ export const bodyToApartmentDataRequest = (req: Request): ApartmentDataRequest =
         rooms: intOrUndefined(rooms),
         owner,
         numberOfApartments: intOrUndefined(numberOfApartments),
-        groupBy: (groupBy as string[])
-            .map(item => apartmentDataKeyMap[item] || item as keyof ApartmentData)
-            .filter(Boolean)
+        groupBy: mapItemsAsKeys(groupBy, apartmentDataKeyMap)
     };
 }
 
 export const filterApartmentData = (data: ApartmentData[], request: ApartmentDataRequest): ApartmentData[] => {
-    return data.filter(item => {
-        const {
-            startYear,
-            endYear,
-            year,
-            quar,
-            kreis,
-            minRooms,
-            maxRooms,
-            rooms,
-            owner,
-            numberOfApartments,
-        } = request;
+    const {
+        startYear,
+        endYear,
+        year,
+        quar,
+        kreis,
+        minRooms,
+        maxRooms,
+        rooms,
+        owner,
+        numberOfApartments,
+    } = request;
+    const startYearInt = intOrUndefined(startYear);
+    const endYearInt = intOrUndefined(endYear);
+    const yearInt = intOrUndefined(year);
 
-        const startYearInt = intOrUndefined(startYear);
-        const endYearInt = intOrUndefined(endYear);
-        const yearInt = intOrUndefined(year);
+    return data.filter(item => {
 
         if (isNumber(item.StichtagDatJahr) && (startYearInt || endYearInt || yearInt)) {
             const itemYear = intOrUndefined(item.StichtagDatJahr)!;
