@@ -58,6 +58,9 @@ const router = Router();
  *                 returned:
  *                   type: integer
  *                   description: The number of population records returned
+ *                 source:
+ *                   type: string
+ *                   description: The source of the population data
  *                 data:
  *                   type: array
  *                   items:
@@ -103,7 +106,7 @@ router.get('/', async (req, res) => {
 
     if (filteredResults.length > 0) {
         const resValues = groupDataByQueryParamsCombined(filteredResults, ['StichtagDatJahr', 'AnzBestWir'], {sum: true})
-        res.status(200).json(resValues)
+        res.status(200).json({...resValues, source: populationQueryUrl})
     } else {
         res.status(404).json({error: 'No data found for the specified parameters'});
     }

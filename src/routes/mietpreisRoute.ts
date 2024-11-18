@@ -33,9 +33,22 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
+ *               type: object
+ *               properties:
+ *                 keys:
+ *                   type: array
+ *                   description: Array of keys by which the data was grouped.
+ *                   items:
+ *                     type: string
+ *                 total:
+ *                   type: number
+ *                   description: Total number of grouped data items.
+ *                 result:
+ *                   type: object
+ *                   description: The grouped data result.
+ *                 source:
+ *                   type: string
+ *                   description: Source URL of the original data.
  *       400:
  *         description: Bad request.
  *       404:
@@ -52,7 +65,11 @@ router.post('/', async (req, res) => {
             res.status(200).json(filteredData);
             return;
         }
-        res.status(200).json(groupDataByQueryParamsCombined(filteredData, requestBody.groupBy, {statisticalSummaries: true}))
+        const groupedData = groupDataByQueryParamsCombined(filteredData, requestBody.groupBy, {statisticalSummaries: true})
+        res.status(200).json({
+            ...groupedData,
+            source: dataUrl
+        })
     } catch (e) {
         console.error(e)
         res.status(400).json({error: e})

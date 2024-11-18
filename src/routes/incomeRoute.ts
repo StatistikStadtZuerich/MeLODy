@@ -196,6 +196,9 @@ router.get('/', async (req, res) => {
  *                   type: object
  *                 total:
  *                   type: integer
+ *                 source:
+ *                   type: string
+ *                   description: The source of the data
  *       404:
  *         description: No data found for the specified parameters or no subroutes specified
  *       500:
@@ -216,7 +219,7 @@ router.post('/', async (req, res) => {
             return;
         }
         const groupedData = groupDataByQueryParamsCombined(filteredData, subroutes, {statisticalSummaries: true});
-        res.json(groupedData);
+        res.status(200).json({...groupedData, source: sszDataUrl});
     } catch (error) {
         console.error('An error occurred:', error);
         res.status(500).json({error: 'Internal Server Error'});

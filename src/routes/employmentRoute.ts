@@ -44,6 +44,9 @@ const router = Router()
  *                 total:
  *                   type: integer
  *                   description: Total number of records.
+ *                 source:
+ *                   type: string
+ *                   description: The source of the data
  *       404:
  *         description: No data found for the specified parameters.
  *         content:
@@ -79,7 +82,14 @@ router.post('/', async (req, res) => {
         if (!subroutes.includes('AnzBeschaeftigte_noDM') && !subroutes.includes('vza_noDM')) {
             subroutes.push('AnzBeschaeftigte_noDM');
         }
-        res.status(200).json(groupDataByQueryParamsCombined(filteredData, request.groupBy, {statisticalSummaries: true}));
+        res.status(200).json({
+            ...groupDataByQueryParamsCombined(filteredData, request.groupBy,
+                {
+                    statisticalSummaries: true
+                }
+            ),
+            source: dataUrl
+        });
     } catch (e) {
         console.error(e);
         res.status(400).json({error: e});

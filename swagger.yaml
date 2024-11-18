@@ -12,40 +12,39 @@ paths:
       summary: 'Filter and group apartment data'
       operationId: filterAndGroupApartmentData
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ApartmentDataRequest' } } } }
-      responses: { '200': { description: 'Filtered and optionally grouped apartment data', content: { application/json: { schema: { type: object, properties: { keys: { type: array, items: { type: string } }, total: { type: integer }, result: { type: object } } } } } }, '404': { description: 'No data found for the specified parameters', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
+      responses: { '200': { description: 'Filtered and optionally grouped apartment data', content: { application/json: { schema: { type: object, properties: { keys: { type: array, items: { type: string } }, total: { type: integer }, result: { type: object }, source: { type: string, description: 'The source of the data' } } } } } }, '404': { description: 'No data found for the specified parameters', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
   /demographics:
     post:
       summary: 'Retrieve demographic data with filtering and grouping'
       operationId: getDemographicData
-      requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/DemographicDataRequestQueryFilter' } } } }
-      responses: { '200': { description: 'Successfully retrieved and grouped demographic data', content: { application/json: { schema: { type: object, properties: { result: { type: object, additionalProperties: { type: object }, description: 'The grouped demographic data' }, keys: { type: array, items: { type: string }, description: 'The keys used for grouping the data' }, total: { type: integer, description: 'The total number of records found' } } } } } }, '404': { description: 'No data found for the specified parameters or no groupBy specified' } }
+      requestBody: { '200': { description: 'Successfully retrieved and grouped demographic data', content: { application/json: { schema: { type: object, properties: { result: { type: object, additionalProperties: { type: object }, description: 'The grouped demographic data' }, keys: { type: array, items: { type: string }, description: 'The keys used for grouping the data' }, total: { type: integer, description: 'The total number of records found' }, source: { type: string, description: 'The source of the data' } } } } } }, '404': { description: 'No data found for the specified parameters or no groupBy specified' }, content: { application/json: { schema: { $ref: '#/components/schemas/DemographicDataRequestQueryFilter' } } } }
   /employment:
     post:
       summary: 'Filter and group employment data'
       description: 'Filters the employment data based on various parameters and groups the data if specified.'
       operationId: filterAndGroupEmploymentData
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/EmploymentDataRequest' } } } }
-      responses: { '200': { description: 'Successful response with filtered (and possibly grouped) data.', content: { application/json: { schema: { type: object, properties: { keys: { type: array, items: { type: string } }, result: { type: object, description: 'Grouped data.' }, total: { type: integer, description: 'Total number of records.' } } } } } }, '400': { description: 'Bad request due to invalid parameters.', content: { application/json: { schema: { type: object, properties: { error: { type: string } } } } } }, '404': { description: 'No data found for the specified parameters.', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
+      responses: { '200': { description: 'Successful response with filtered (and possibly grouped) data.', content: { application/json: { schema: { type: object, properties: { keys: { type: array, items: { type: string } }, result: { type: object, description: 'Grouped data.' }, total: { type: integer, description: 'Total number of records.' }, source: { type: string, description: 'The source of the data' } } } } } }, '400': { description: 'Bad request due to invalid parameters.', content: { application/json: { schema: { type: object, properties: { error: { type: string } } } } } }, '404': { description: 'No data found for the specified parameters.', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
   /income:
     post:
       summary: 'Retrieve grouped income data based on filters and grouping parameters'
       operationId: postIncomeData
       requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/IncomeDataRequest' } } } }
-      responses: { '200': { description: 'A grouped set of income data', content: { application/json: { schema: { type: object, properties: { keys: { type: array, items: { type: string } }, result: { type: object }, total: { type: integer } } } } } }, '404': { description: 'No data found for the specified parameters or no subroutes specified' }, '500': { description: 'Internal Server Error' } }
+      responses: { '200': { description: 'A grouped set of income data', content: { application/json: { schema: { type: object, properties: { keys: { type: array, items: { type: string } }, result: { type: object }, total: { type: integer }, source: { type: string, description: 'The source of the data' } } } } } }, '404': { description: 'No data found for the specified parameters or no subroutes specified' }, '500': { description: 'Internal Server Error' } }
   /mietpreise:
     post:
       summary: 'Fetch and filter Mietpreis data'
       description: 'Fetches Mietpreis data based on the given filter criteria and optionally groups the data.'
       operationId: fetchMietpreisData
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MietpreisDataRequest' } } } }
-      responses: { '200': { description: 'Successful response with Mietpreis data.', content: { application/json: { schema: { type: array, items: { type: object } } } } }, '400': { description: 'Bad request.' }, '404': { description: 'No data found for the specified parameters.' } }
+      responses: { '200': { description: 'Successful response with Mietpreis data.', content: { application/json: { schema: { type: object, properties: { keys: { type: array, description: 'Array of keys by which the data was grouped.', items: { type: string } }, total: { type: number, description: 'Total number of grouped data items.' }, result: { type: object, description: 'The grouped data result.' }, source: { type: string, description: 'Source URL of the original data.' } } } } } }, '400': { description: 'Bad request.' }, '404': { description: 'No data found for the specified parameters.' } }
   /population:
     get:
       summary: 'Retrieve population data'
       description: 'Retrieve population data based on various filters such as year, startYear, endYear, minPopulation, maxPopulation.'
       operationId: getPopulationNumbers
       parameters: [ { in: query, name: year, schema: { type: string }, description: 'Filter by specific year' }, { in: query, name: startYear, schema: { type: string }, description: 'Filter by start year' }, { in: query, name: endYear, schema: { type: string }, description: 'Filter by end year' }, { in: query, name: minPopulation, schema: { type: integer }, description: 'Filter by minimum population' }, { in: query, name: maxPopulation, schema: { type: integer }, description: 'Filter by maximum population' } ]
-      responses: { '200': { description: 'A list of population data', content: { application/json: { schema: { type: object, properties: { total: { type: integer, description: 'The total number of population records' }, returned: { type: integer, description: 'The number of population records returned' }, data: { type: array, items: { $ref: '#/components/schemas/PopulationData' } } } } } } }, '404': { description: 'No data found for the specified parameters', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
+      responses: { '200': { description: 'A list of population data', content: { application/json: { schema: { type: object, properties: { total: { type: integer, description: 'The total number of population records' }, returned: { type: integer, description: 'The number of population records returned' }, source: { type: string, description: 'The source of the population data' }, data: { type: array, items: { $ref: '#/components/schemas/PopulationData' } } } } } } }, '404': { description: 'No data found for the specified parameters', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
 components:
   schemas:
     DemographicData:

@@ -42,6 +42,9 @@ const router = Router();
  *                   type: integer
  *                 result:
  *                   type: object
+ *                 source:
+ *                   type: string
+ *                   description: The source of the data
  *       404:
  *         description: No data found for the specified parameters
  *         content:
@@ -68,7 +71,7 @@ router.post('/', async (req, res) => {
     if (!subroutes.includes('AnzWhgStat')) {
         subroutes.push('AnzWhgStat');
     }
-    res.status(200).json(groupDataByQueryParamsCombined(filteredData, subroutes, {sum: true}))
+    res.status(200).json({...groupDataByQueryParamsCombined(filteredData, subroutes, {sum: true}), source: sszUrl});
 })
 
 export default router;

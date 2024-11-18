@@ -209,7 +209,6 @@ router.post('/aggregate/countPerYear', async (req: Request, res: Response) => {
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/DemographicDataRequestQueryFilter'
- *     responses:
  *       200:
  *         description: Successfully retrieved and grouped demographic data
  *         content:
@@ -230,6 +229,9 @@ router.post('/aggregate/countPerYear', async (req: Request, res: Response) => {
  *                 total:
  *                   type: integer
  *                   description: The total number of records found
+ *                 source:
+ *                   type: string
+ *                   description: The source of the data
  *       404:
  *         description: No data found for the specified parameters or no groupBy specified
  */
@@ -250,7 +252,7 @@ router.post('/', (req: Request, res: Response) => {
         return;
     }
     const groupedData = groupDataByQueryParamsCombined(filteredData, subroutes, {sum: true});
-    res.json(groupedData);
+    res.status(200).json({...groupedData, source: sszDataUrl});
 });
 
 
