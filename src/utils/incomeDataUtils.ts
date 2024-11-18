@@ -5,35 +5,6 @@ import {toValidString} from "./stringUtils";
 import {IncomeData} from "../models/incomeData";
 import {mapItemsAsKeys} from "./dataUtils";
 
-export const mapQueryToIncomeDataRequest = (req: Request): IncomeDataRequest => {
-    const {
-        startYear,
-        endYear,
-        year,
-        quar,
-        tarif,
-        taxIncome_p50,
-        taxIncome_p25,
-        taxIncome_p75,
-        groupBy = []
-    } = req.query;
-
-
-    return {
-        startYear: intOrUndefined(startYear),
-        endYear: intOrUndefined(endYear),
-        year: intOrUndefined(year),
-        quar: toValidString(quar as string),
-        tarif: toValidString(tarif as string),
-        taxIncome_p50: numberOrUndefined(taxIncome_p50),
-        taxIncome_p25: numberOrUndefined(taxIncome_p25),
-        taxIncome_p75: numberOrUndefined(taxIncome_p75),
-        groupBy: (groupBy as string[]).map(item => incomeKeyMap[item]).filter(Boolean)
-        // responseKeys: responseKeys ? (responseKeys as string[]).map(key => key.toString()) : [],
-        // groupBy: groupBy?.toString()?.trim() as keyof DemographicData | undefined
-    };
-};
-
 export const bodyToIncomeDataRequest = (req: Request): IncomeDataRequest => {
     const {
         startYear,
@@ -53,7 +24,7 @@ export const bodyToIncomeDataRequest = (req: Request): IncomeDataRequest => {
         endYear: intOrUndefined(endYear),
         year: intOrUndefined(year),
         quar: toValidString(quar),
-        tarif: toValidString(tarif),
+        tarif: tarif,
         taxIncome_p50: numberOrUndefined(taxIncome_p50),
         taxIncome_p25: numberOrUndefined(taxIncome_p25),
         taxIncome_p75: numberOrUndefined(taxIncome_p75),

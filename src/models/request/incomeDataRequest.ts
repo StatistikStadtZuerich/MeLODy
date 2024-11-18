@@ -19,6 +19,10 @@
  *           description: Quarter for the income data
  *         tarif:
  *           type: string
+ *           enum:
+ *             - Grundtarif
+ *             - Verheiratetentarif
+ *             - Einelternfamilientarif
  *           description: Tax tariff
  *         taxIncome_p50:
  *           type: number
@@ -47,7 +51,7 @@ export interface IncomeDataRequest {
     endYear?: number;
     year?: number;
     quar?: string;
-    tarif?: string;
+    tarif?: 'Grundtarif' | 'Verheiratetentarif' | 'Einelternfamilientarif';
     taxIncome_p50?: number;
     taxIncome_p25?: number;
     taxIncome_p75?: number;

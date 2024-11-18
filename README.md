@@ -37,6 +37,54 @@ Hier sind einige Beispielanfragen, die gut funktionieren:
 2. **Zeige mir die Geschlechterverteilung über die Jahre.**
 3. **Zeige den Unterschied zwischen Einheimischen und Ausländern zwischen den Geschlechtern über die Jahre.**
 4. **Zeige mir die Altersverteilung von diesem Jahr.**
+5. **Wie hat sich die Anzahl an Kindern über die letzten 30 Jahren verändert?**
+6. **Zeige mir einen Graphen wie sich die Anzahl an Wohnungen über die letzten Jahre verändert haben.**
+7. **Wie hat sich das Einkommen über die letzten Jahre entwickelt?**
+8. **Wie haben sich die Mieten in Quartier XY entwickelt?**
+9. **Wie hat sich die Anzahl der Beschäftigen über die letzten Jahre verändert?**
+
+## Wie die Datenerfassung funktioniert
+
+Um zu verstehen, wie der SSZ Statistics Bot V2.0 Daten verarbeitet und zurückgibt, finden Sie hier eine
+Schritt-für-Schritt-Erklärung:
+
+1. **Transformieren der Anfrage:**
+    - Die API transformiert den Anfrage-Body oder die Query-Parameter in ein Anfrage-Body-Objekt. Dieses Objekt enthält
+      datasetspezifische Filtereigenschaften und, falls zutreffend, ein `groupBy` Feld. Verfügbare Felder der Datensätze
+      können verwendet werden, um die zurückgegebenen Daten zu gruppieren.
+
+2. **Filtern der Daten:**
+    - Die API filtert die Daten basierend auf den angegebenen Filterparametern. Dies stellt sicher, dass nur relevante
+      Daten abgerufen werden, die den festgelegten Kriterien entsprechen.
+
+3. **Gruppieren der Daten:**
+    - Die gefilterten Daten werden dann in einem Objekt gruppiert. Die Gruppierung basiert auf den Feldern, die im
+      `groupBy` Parameter angegeben sind, wodurch strukturierte und kategorisierte Datenresultate ermöglicht werden.
+
+4. **Transformieren der Daten in eine statistische Zusammenfassung:**
+    - Um mit großen Datensätzen umzugehen, die ChatGPT möglicherweise nicht verarbeiten kann, wird das endgültige
+      Datenset in eine statistische Zusammenfassung transformiert. Diese Zusammenfassung umfasst die folgenden
+      statistischen Felder:
+        - **Mittelwert (mean)**
+        - **Median**
+        - **Modus (mode)**
+        - **Summe (sum)**
+        - **Minimum (min)**
+        - **Maximum (max)**
+        - **Quartile**
+        - **Standardabweichung (standardDeviation)**
+        - **Varianz**
+
+5. **Antwortstruktur:**
+    - Die Antwort von der API enthält:
+        - Eine Liste der Felder, sortiert nach der Gruppenreihenfolge.
+        - Die Gesamtanzahl der Daten.
+        - Die Originaldatenquelle.
+        - Das Datenresultat selbst, transformiert in eine prägnante, statistische Zusammenfassung für eine effiziente
+          Verarbeitung und Analyse.
+
+Durch das Befolgen dieser Schritte stellt der SSZ Statistics Bot V2.0 eine effiziente Datenverarbeitung sicher und
+liefert strukturierte, aussagekräftige Ergebnisse, die leicht von ChatGPT interpretiert werden können.
 
 ## API-Dokumentation
 
