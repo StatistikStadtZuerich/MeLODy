@@ -41,7 +41,7 @@ Hier sind einige Beispielanfragen, die gut funktionieren:
 6. **Zeige mir einen Graphen wie sich die Anzahl an Wohnungen über die letzten Jahre verändert haben.**
 7. **Wie hat sich das Einkommen über die letzten Jahre entwickelt?**
 8. **Wie haben sich die Mieten in Quartier XY entwickelt?**
-9. **Wie hat sich die Anzahl der Beschäftigen über die letzten Jahre verändert?**
+9. **Wie hat sich die Anzahl der Beschäftigten über die letzten Jahre verändert?**
 
 ## Wie die Datenerfassung funktioniert
 
