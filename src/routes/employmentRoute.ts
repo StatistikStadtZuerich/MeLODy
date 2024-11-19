@@ -83,11 +83,7 @@ router.post('/', async (req, res) => {
             subroutes.push('AnzBeschaeftigte_noDM');
         }
         res.status(200).json({
-            ...groupDataByQueryParamsCombined(filteredData, request.groupBy,
-                {
-                    statisticalSummaries: true
-                }
-            ),
+            ...groupDataByQueryParamsCombined(filteredData, request.groupBy),
             source: dataUrl
         });
     } catch (e) {

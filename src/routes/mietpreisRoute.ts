@@ -61,11 +61,8 @@ router.post('/', async (req, res) => {
         if (filteredData.length === 0) {
             res.status(404).json({error: 'No data found for the specified parameters'});
             return;
-        } else if (requestBody.groupBy.length === 0) {
-            res.status(200).json(filteredData);
-            return;
         }
-        const groupedData = groupDataByQueryParamsCombined(filteredData, requestBody.groupBy, {statisticalSummaries: true})
+        const groupedData = groupDataByQueryParamsCombined(filteredData, ['StichtagDatJahr', 'RaumeinheitLang', 'ZimmerLang', 'GemeinnuetzigLang', 'EinheitLang', 'PreisartLang', 'qu25', 'mean', 'qu75'], {statisticalSummaries: false})
         res.status(200).json({
             ...groupedData,
             source: dataUrl

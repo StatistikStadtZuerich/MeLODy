@@ -1,3 +1,5 @@
+import {EmploymentData} from "../employmentData";
+
 /**
  * @swagger
  * components:
@@ -54,5 +56,5 @@ export interface EmploymentDataRequest {
     startQuartal?: number;
     endQuartal?: number;
     quartal?: number;
-    groupBy: string[];
+    groupBy: (keyof EmploymentData)[];
 }

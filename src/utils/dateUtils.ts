@@ -6,16 +6,6 @@ export const parseMonthFromString = (dateStr: string, fromFormat: string = "yyyy
         return dt.month;
     }
 };
-
-export const dateIsValid = (date?: Date | string): boolean => {
-    if (!date) {
-        return false;
-    } else if (typeof date === 'string') {
-        return !!dateTimeFromString(date);
-    }
-    return DateTime.fromJSDate(date).isValid;
-};
-
 export type DateString = 'iso' | 'sql' | 'http';
 
 export const dateTimeFromString = (
@@ -43,12 +33,4 @@ export const dateTimeFromString = (
         }
     }
     return undefined;
-};
-
-export const createLuxonDateTime = (input: Date | string, timezone?: string): DateTime | undefined => {
-    if (input instanceof Date) {
-        return DateTime.fromJSDate(input, {zone: timezone});
-    } else {
-        return dateTimeFromString(input, timezone);
-    }
 };

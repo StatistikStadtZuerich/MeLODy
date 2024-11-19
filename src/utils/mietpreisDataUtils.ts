@@ -46,15 +46,12 @@ export const bodyToMietpreisRequest = (req: Request): MietpreisDataRequest => {
         year,
         month,
         areaType,
-        categoryType,
         kreis,
         minNumberOfRooms,
         maxNumberOfRooms,
         numberOfRooms,
         groupBy = [],
         gemein,
-        messung,
-        bruttoNetto
     } = req.body || {};
 
     return {
@@ -64,16 +61,16 @@ export const bodyToMietpreisRequest = (req: Request): MietpreisDataRequest => {
         endMonth: intOrUndefined(endMonth),
         year: intOrUndefined(year),
         month: intOrUndefined(month),
-        areaType,
-        categoryType,
+        areaType: areaType,
+        categoryType: "Ganze Stadt",
         kreis: intOrUndefined(kreis),
         minNumberOfRooms: intOrUndefined(minNumberOfRooms),
         maxNumberOfRooms: intOrUndefined(maxNumberOfRooms),
         numberOfRooms: intOrUndefined(numberOfRooms),
-        groupBy: mapItemsAsKeys(groupBy, mietPreisKeyMap),
         gemein,
-        messung,
-        bruttoNetto
+        // messung: "Wohnung",
+        // bruttoNetto: 'Netto',
+        groupBy: mapItemsAsKeys(groupBy, mietPreisKeyMap)
     };
 }
 

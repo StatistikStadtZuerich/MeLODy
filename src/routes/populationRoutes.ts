@@ -12,7 +12,7 @@ sszDataFetcher<PopulationData>(populationQueryUrl).then(result => {
 const router = Router();
 
 /**
- * @swagger
+ // * @swagger
  * /population:
  *   get:
  *     summary: Retrieve population data

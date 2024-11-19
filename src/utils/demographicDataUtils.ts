@@ -1,22 +1,9 @@
 import {DemographicData} from "../models/demographicData";
 import {intOrUndefined, isNumber} from "./numberUtils";
-import {Request, Response} from 'express';
+import {Request} from 'express';
 
 import {DemographicDataRequestQueryFilter} from "../models/request/demographicDataRequest";
-import {
-    bodyToSimpleSelectionCriteria,
-    countOccurrencesForMultipleKeys,
-    countOccurrencesPerYearMultipleKeys,
-    extractYearRange,
-    mapItemsAsKeys,
-    populationPerYear,
-    sortKeysBySumOfArrays,
-    sortResultEntriesByValues
-} from "./dataUtils";
-import {DemographicDataCountResponse, DemographicDataPerYearResponse} from "../models/response/DemographicDataResponse";
-import {ResultType, ResultTypeWithArrays, ResultTypeWithMatrix} from "../models/response/results";
-import {SimpleSelectionCriteria} from "../models/SelectionCriteria";
-import {toValidString} from "./stringUtils";
+import {mapItemsAsKeys} from "./dataUtils";
 
 
 export const demographicDataFiltered = (req: DemographicDataRequestQueryFilter, data: DemographicData[]): DemographicData[] => {
@@ -136,43 +123,6 @@ export const demographicKeyMap: Record<string, keyof DemographicData> = {
     population: 'AnzBestWir'
 }
 
-export const mapQueryToDemographicDataRequest = (req: Request): DemographicDataRequestQueryFilter => {
-    const {
-        startYear,
-        endYear,
-        year,
-        kreis,
-        quar,
-        age,
-        minAge,
-        maxAge,
-        sex,
-        herkunft,
-        population,
-        minPopulation,
-        maxPopulation,
-        groupBy = []
-    } = req.query;
-
-
-    return {
-        startYear: intOrUndefined(startYear),
-        endYear: intOrUndefined(endYear),
-        year: intOrUndefined(year),
-        kreis: intOrUndefined(kreis),
-        quar: toValidString(quar as string),
-        age: intOrUndefined(age),
-        minAge: intOrUndefined(minAge),
-        maxAge: intOrUndefined(maxAge),
-        sex: sexString(sex),
-        herkunft: herkunftsString(herkunft),
-        population: intOrUndefined(population),
-        minPopulation: intOrUndefined(minPopulation),
-        maxPopulation: intOrUndefined(maxPopulation),
-        groupBy: mapItemsAsKeys(groupBy as string[], demographicKeyMap)
-    };
-};
-
 export const bodyToDemographicDataRequest = (req: Request): DemographicDataRequestQueryFilter => {
     const {
         startYear,
@@ -207,76 +157,4 @@ export const bodyToDemographicDataRequest = (req: Request): DemographicDataReque
         maxPopulation: intOrUndefined(maxPopulation),
         groupBy: mapItemsAsKeys(groupBy, demographicKeyMap)
     };
-};
-
-export const reqToDemographicData = async (req: Request, res: Response, data: DemographicData[], perYear: boolean) => {
-
-    try {
-        const requestBody = bodyToDemographicDataRequest(req.body);
-        const selection = bodyToSimpleSelectionCriteria(req.body);
-        const result = await aggregateDemographicData(requestBody, selection, data, perYear);
-        if (!result) {
-            res.status(404).json({message: 'No data found for the specified parameters'});
-            return;
-        }
-        res.status(200).json(result);
-    } catch (error) {
-        res.status(500).json({error});
-    }
-
-}
-
-export const aggregateDemographicData = async (requestBody: DemographicDataRequestQueryFilter, selection: SimpleSelectionCriteria, data: DemographicData[], perYear: boolean): Promise<DemographicDataCountResponse | DemographicDataPerYearResponse | undefined> => {
-    const filteredData = demographicDataFiltered(requestBody, data);
-
-    const defaultKeys = ["SexKurz", "KreisLang", "QuarLang", "HerkunftLang"];
-    const keysToRespondWith = defaultKeys.map(key => key as keyof DemographicData);
-
-    if (!filteredData.length) {
-        return;
-    }
-
-    const yearRange = extractYearRange(filteredData.map(d => d.StichtagDatJahr));
-
-    let aggregatedResult: DemographicDataCountResponse | DemographicDataPerYearResponse | undefined;
-
-    if (perYear) {
-        let occurrencePerYear: ResultTypeWithArrays | ResultTypeWithMatrix;
-        let groupedByValues: (string | number)[] = [];
-        // if (requestBody.groupBy && requestBody.groupBy in filteredData[0]) {
-        //     groupedByValues = Array.from(new Set(filteredData.map(item => item[requestBody.groupBy as keyof DemographicData])))
-        //     occurrencePerYear = countOccurrencesPerGroupPerYear(filteredData, keysToRespondWith, requestBody.groupBy, groupedByValues, 'StichtagDatJahr')
-        // } else {
-        // }
-        occurrencePerYear = sortKeysBySumOfArrays(countOccurrencesPerYearMultipleKeys(filteredData, keysToRespondWith, 'StichtagDatJahr', yearRange?.yearsIncluded || []), selection.sortAsc);
-        const populationInYears = populationPerYear(filteredData, 'AnzBestWir', 'StichtagDatJahr', yearRange?.yearsIncluded || []);
-
-        aggregatedResult = {
-            returned: filteredData.length,
-            yearRange,
-            population: populationInYears,
-            groupedByValues,
-            result: occurrencePerYear
-        };
-    } else {
-        let occurrenceCount: ResultType | ResultTypeWithArrays
-        let groupedByValues: (string | number)[] = [];
-        // if (requestBody.groupBy && requestBody.groupBy in filteredData[0]) {
-        //     groupedByValues = Array.from(new Set(filteredData.map(item => item[requestBody.groupBy as keyof DemographicData])))
-        //     occurrenceCount = countOccurrencesPerGroupMultipleKeys(filteredData, keysToRespondWith, requestBody.groupBy as keyof DemographicData, groupedByValues);
-        // } else {
-        // }
-        occurrenceCount = sortResultEntriesByValues(countOccurrencesForMultipleKeys(filteredData, keysToRespondWith), selection.sortAsc);
-        const populationComplete = filteredData.reduce((acc, curr) => acc + (intOrUndefined(curr.AnzBestWir) || 0), 0);
-
-        aggregatedResult = {
-            returned: filteredData.length,
-            yearRange,
-            population: populationComplete,
-            groupedByValues,
-            result: occurrenceCount
-        };
-
-    }
-    return aggregatedResult
 };

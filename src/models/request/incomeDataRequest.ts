@@ -1,3 +1,5 @@
+import {IncomeData} from "../incomeData";
+
 /**
  * @swagger
  * components:
@@ -55,5 +57,5 @@ export interface IncomeDataRequest {
     taxIncome_p50?: number;
     taxIncome_p25?: number;
     taxIncome_p75?: number;
-    groupBy: string[];
+    groupBy: (keyof IncomeData)[];
 }

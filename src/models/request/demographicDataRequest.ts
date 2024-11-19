@@ -1,78 +1,4 @@
-/**
- * @swagger
- * components:
- *   schemas:
- *     DemographicDataRequest:
- *       type: object
- *       properties:
- *         startYear:
- *           type: [string, number]
- *           description: The starting year for filtering data
- *         endYear:
- *           type: [string, number]
- *           description: The ending year for filtering data
- *         year:
- *           type: [string, number]
- *           description: A specific year for filtering data
- *         Kreis:
- *           type: string
- *           description: The district for filtering data
- *         Quar:
- *           type: string
- *           description: The neighborhood for filtering data
- *         Alter:
- *           type: string
- *           description: The age category for filtering data
- *         Sex:
- *           type: string
- *           description: The gender for filtering data
- *         Herkunft:
- *           type: string
- *           description: The origin for filtering data
- *         minResidents:
- *           type: [string, number]
- *           description: The minimum number of residents for filtering data
- *         maxResidents:
- *           type: [string, number]
- *           description: The maximum number of residents for filtering data
- *         groupBy:
- *           type: string
- *           enum:
- *             - AlterVCd
- *             - AlterVKurz
- *             - AlterV05Sort
- *             - AlterV05Cd
- *             - AlterV05Kurz
- *             - AlterV10Cd
- *             - AlterV10Kurz
- *             - AlterV20Cd
- *             - AlterV20Kurz
- *             - SexLang
- *             - SexKurz
- *             - KreisLang
- *             - QuarLang
- *             - HerkunftLang
- *           description: A key of DemographicData to group the results by
- */
 import {DemographicData} from "../demographicData";
-
-export interface DemographicDataRequest {
-    startYear?: number;
-    endYear?: number;
-    year?: number;
-    Kreis?: number;
-    Quar?: string;
-    minAge?: number;
-    maxAge?: number;
-    age?: number;
-    Sex?: string;
-    Herkunft?: string;
-    minResidents?: string | number;
-    maxResidents?: string | number;
-    responseKeys: string[];
-    groupBy?: keyof DemographicData;
-}
-
 
 /**
  * @swagger
@@ -131,18 +57,6 @@ export interface DemographicDataRequest {
  *           enum: ['Schweizer*in', 'Ausländer*in']
  *           description: The origin for filtering data
  *           example: 'Schweizer*in'
- *         population:
- *           type: integer
- *           description: The population size for filtering data
- *           example: 10000
- *         minPopulation:
- *           type: integer
- *           description: The minimum population size for filtering data
- *           example: 5000
- *         maxPopulation:
- *           type: integer
- *           description: The maximum population size for filtering data
- *           example: 20000
  *         groupBy:
  *           type: array
  *           items:
@@ -156,9 +70,6 @@ export interface DemographicDataRequest {
  *             - kreis
  *             - quar
  *             - age
- *             - age5
- *             - age10
- *             - age20
  *             - population
  */
 export interface DemographicDataRequestQueryFilter {
@@ -175,5 +86,5 @@ export interface DemographicDataRequestQueryFilter {
     kreis?: number;
     quar?: string;
     herkunft?: 'Schweizer*in' | 'Ausländer*in';
-    groupBy: string[];
+    groupBy: (keyof DemographicData)[];
 }
