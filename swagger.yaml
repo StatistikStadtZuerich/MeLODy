@@ -65,24 +65,6 @@ components:
     MietpreisDataRequest:
       type: object
       properties: { startYear: { type: integer, description: 'The start year of the request', example: 2020 }, endYear: { type: integer, description: 'The end year of the request', example: 2021 }, year: { type: integer, description: 'A specific year for the request', example: 2022 }, areaType: { type: string, enum: [ 'Ganze Stadt', Stadtkreise, Stadtquartiere, 'Statistische Quartiere' ], description: 'Type of area', example: 'Ganze Stadt' }, minNumberOfRooms: { type: integer, description: 'Minimum number of rooms', example: 2, minimum: 1 }, maxNumberOfRooms: { type: integer, description: 'Maximum number of rooms', example: 4, minimum: 1 }, numberOfRooms: { type: integer, description: 'Specific number of rooms', example: 3, minimum: 1 }, gemein: { type: string, enum: [ Gemeinnützig, 'Nicht gemeinnützig' ], description: 'Indicates if it is profit', example: Gemeinnützig }, groupBy: { type: array, items: { type: string, enum: [ StichtagDatJahr, StichtagDatMonat, RaumeinheitLang, ZimmerLang, GemeinnuetzigLang, mean, qu25, qu50, qu75 ] }, description: 'Grouping fields', example: [ StichtagDatJahr, ZimmerSort ] } }
-    DemographicDataCountResponse:
-      type: object
-      properties: { returned: { type: integer, description: 'The number of items returned' }, yearRange: { $ref: '#/components/schemas/YearRange', description: 'The range of years for the demographic data' }, population: { type: integer, description: 'The population count' }, groupedByValues: { type: array, items: { oneOf: [ { type: string }, { type: integer } ] }, description: 'Values by which the data is grouped' }, result: { oneOf: [ { $ref: '#/components/schemas/ResultType' }, { $ref: '#/components/schemas/ResultTypeWithArrays' } ], description: 'The result data' } }
-    DemographicDataPerYearResponse:
-      type: object
-      properties: { returned: { type: integer, description: 'The number of items returned' }, yearRange: { $ref: '#/components/schemas/YearRange', description: 'The range of years for the demographic data' }, population: { type: array, items: { type: integer }, description: 'The population count per year' }, groupedByValues: { type: array, items: { oneOf: [ { type: string }, { type: integer } ] }, description: 'Values by which the data is grouped' }, result: { oneOf: [ { $ref: '#/components/schemas/ResultTypeWithArrays' }, { $ref: '#/components/schemas/ResultTypeWithMatrix' } ], description: 'The result data' } }
-    ResultType:
-      type: object
-      properties: { }
-      additionalProperties: { type: object, properties: { }, additionalProperties: { type: number } }
-    ResultTypeWithArrays:
-      type: object
-      properties: { }
-      additionalProperties: { type: object, properties: { }, additionalProperties: { type: array, items: { type: number } } }
-    ResultTypeWithMatrix:
-      type: object
-      properties: { }
-      additionalProperties: { type: object, properties: { }, additionalProperties: { type: array, items: { type: array, items: { type: number } } } }
     SelectionCriteria:
       type: object
       properties: { sortBy: { type: string, description: 'Field to sort by' }, sortAsc: { type: boolean, description: 'Sort in ascending order' }, limit: { type: integer, description: 'Limit the number of results' }, offset: { type: integer, description: 'Offset the results by a certain number' } }
