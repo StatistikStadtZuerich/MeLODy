@@ -91,6 +91,33 @@ Schritt-für-Schritt-Erklärung:
 Durch das Befolgen dieser Schritte stellt der SSZ Statistics Bot V2.0 eine effiziente Datenverarbeitung sicher und
 liefert strukturierte, aussagekräftige Ergebnisse, die leicht von ChatGPT interpretiert werden können.
 
+## Verbesserte Datenformate zur Optimierung von Anfragen und effizienteren Analysen mit ChatGPT
+
+### Demografie
+
+| Jahr (Number) | Kreis (Number) | Quartier (Affoltern - String) | Herkunft (Schweiz/Ausland) | Geschlecht (M/F) | Alter (Number) | Einwohner (Number) |
+|---------------|----------------|-------------------------------|----------------------------|------------------|----------------|--------------------|
+
+### Wohnungen
+
+| Jahr (Number) | Kreis (Number) | Quartier (Affoltern - String) | Eigentümer (Öffentlich/Genossenschaft/Privat/Natürliche Person) | Zimmeranzahl (Number) | Anzahl (Number) |
+|---------------|----------------|-------------------------------|-----------------------------------------------------------------|-----------------------|-----------------|
+
+### Erwerbstätige
+
+| Jahr (Number) | Quartal (Number) | Anzahl (Number) | Vollzeit (Number) |
+|---------------|------------------|-----------------|-------------------|
+
+### Miete
+
+| Jahr (Number) | Raum (Ganze Stadt/Kreise/Quartiere) | Zimmeranzahl (Number) | Gemeinnützig (Ja/Nein) | Messung (Wohnung/m²) | Preisart (Brutto/Netto) | Preis (Number) |
+|---------------|-------------------------------------|-----------------------|------------------------|----------------------|-------------------------|----------------|
+
+### Einkommenssteuer
+
+| Jahr (Number) | Quartier (Affoltern - String) | Tarif (Grundtarif/Einzeltarif/Verheiratetentarif) | Einkommenssteuer (Number) |
+|---------------|-------------------------------|---------------------------------------------------|---------------------------|
+
 ## API-Dokumentation
 
 ### API-Informationen
