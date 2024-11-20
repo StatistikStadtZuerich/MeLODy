@@ -4,7 +4,7 @@
 
 **Projektname:** Project SSZ Statistics Bot V2.0
 
-Das Projekt SSZ Statistics Bot V1.0 ist darauf ausgelegt, einen LLM Bot wie ChatGPT mit einer API zu verbinden. Der Bot
+Das Projekt SSZ Statistics Bot V2.0 ist darauf ausgelegt, einen LLM Bot wie ChatGPT mit einer API zu verbinden. Der Bot
 übersetzt Benutzeranfragen in API-Anfragen, welche daraufhin die Daten verarbeiten und zurücksenden. ChatGPT analysiert
 die Antwort, übersetzt sie in verständliche Worte und kann damit weiterarbeiten.
 
