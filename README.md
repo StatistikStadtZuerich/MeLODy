@@ -8,7 +8,7 @@ Das Projekt MeLODy ist darauf ausgelegt, einen LLM Bot wie ChatGPT mit einer API
 übersetzt Benutzeranfragen in API-Anfragen, welche daraufhin die Daten verarbeiten und zurücksenden. ChatGPT analysiert
 die Antwort, übersetzt sie in verständliche Worte und kann damit weiterarbeiten.
 
-[Link to ChatGPT Bot](https://chatgpt.com/g/g-673daf7008ac819180b306f2e2c3f802-ssz-statistics-bot-v2-0)
+[Link to ChatGPT Bot](https://chatgpt.com/g/g-673daf7008ac819180b306f2e2c3f802-melody)
 
 ## Optimierung für ChatGPT
 
