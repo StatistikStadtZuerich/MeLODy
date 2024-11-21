@@ -1,10 +1,10 @@
-# Projekt SSZ Statistics Bot V2.0
+# MeLODy
 
 ## Überblick
 
-**Projektname:** Project SSZ Statistics Bot V2.0
+**Projektname:** MeLODy
 
-Das Projekt SSZ Statistics Bot V2.0 ist darauf ausgelegt, einen LLM Bot wie ChatGPT mit einer API zu verbinden. Der Bot
+Das Projekt MeLODy ist darauf ausgelegt, einen LLM Bot wie ChatGPT mit einer API zu verbinden. Der Bot
 übersetzt Benutzeranfragen in API-Anfragen, welche daraufhin die Daten verarbeiten und zurücksenden. ChatGPT analysiert
 die Antwort, übersetzt sie in verständliche Worte und kann damit weiterarbeiten.
 
@@ -47,7 +47,7 @@ Hier sind einige Beispielanfragen, die gut funktionieren:
 
 ## Wie die Datenerfassung funktioniert
 
-Um zu verstehen, wie der SSZ Statistics Bot V2.0 Daten verarbeitet und zurückgibt, finden Sie hier eine
+Um zu verstehen, wie der MeLODy Bot Daten verarbeitet und zurückgibt, finden Sie hier eine
 Schritt-für-Schritt-Erklärung:
 
 1. **Transformieren der Anfrage:**
@@ -88,7 +88,7 @@ Schritt-für-Schritt-Erklärung:
         - Das Datenresultat selbst, entweder summiert oder gruppiert, für eine effiziente und qualitativ hochwertige
           Analyse durch den Bot.
 
-Durch das Befolgen dieser Schritte stellt der SSZ Statistics Bot V2.0 eine effiziente Datenverarbeitung sicher und
+Durch das Befolgen dieser Schritte stellt der MeLODy Bot eine effiziente Datenverarbeitung sicher und
 liefert strukturierte, aussagekräftige Ergebnisse, die leicht von ChatGPT interpretiert werden können.
 
 ## Verbesserte Datenformate zur Optimierung von Anfragen und effizienteren Analysen mit ChatGPT
@@ -363,7 +363,7 @@ Datenerfassungs- und Verarbeitungslösung, die auf die Bedürfnisse der Nutzer z
 
 ## Fazit
 
-Der SSZ Statistics Bot V2.0 bietet eine effiziente Möglichkeit, Anfragen von Nutzern in strukturierte API-Anfragen zu
+Der MeLODy Bot bietet eine effiziente Möglichkeit, Anfragen von Nutzern in strukturierte API-Anfragen zu
 übersetzen, die Daten zu transformieren und sie in verständlicher Form zurückzugeben. Die automatische
 Swagger-Dokumentation erleichtert Entwicklern den Einstieg und die Nutzung der API. Durch die Einhaltung der oben
 genannten Optimierungen kann die Zusammenarbeit mit ChatGPT weiter verbessert werden.
@@ -373,6 +373,6 @@ Anfrageschnittstellen basierend auf Nutzereingaben und gegebenen Daten-Schemata 
 hierbei die notwendigen Datenfelder für das Filtern und Gruppieren identifizieren, um die Anfragen präzise und effizient
 zu beantworten.
 
-Dadurch wird der SSZ Statistics Bot V2.0 nicht nur benutzerfreundlicher, sondern auch flexibler und skalierbarer für
+Dadurch wird der MeLODy Bot nicht nur benutzerfreundlicher, sondern auch flexibler und skalierbarer für
 zukünftige Erweiterungen. Die Integration und Automatisierung dieser Prozesse reduziert den manuellen Aufwand und erhöht
 die Genauigkeit und Relevanz der Antworten, was zu einem insgesamt verbesserten Nutzungserlebnis führt.
