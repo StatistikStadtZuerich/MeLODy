@@ -8,29 +8,32 @@ if (process.env.DEBUG_MODE === 'true') {
     require('dotenv').config();
 }
 
+const getEnvVar = (name: string, defaultValue: string|undefined = undefined): string => {
+    if(process.env[name]) {
+        return process.env[name]
+    } else {
+        if(!defaultValue) {
+            console.error(`Environment variable not set. Please set the "${name}"`)
+            process.exit(1)
+        } else {
+            return defaultValue
+        }
+    }
+}
+
 const app = express();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
-const port = process.env.PORT;
-const baseURI = process.env.BASE_URI;
-const basePath = process.env.BASE_PATH || '/api/v2';
-const publicURI = process.env.PUBLIC_URI;
+const port = getEnvVar("PORT", "3001");
+const baseURI = getEnvVar("BASE_URI", "http://localhost");
+const basePath = getEnvVar("BASE_PATH", "/api/v2")
 
-if (!port || !baseURI || !basePath) {
-    console.error(
-        'Environment variables not set. Please set the following environment variables: PORT, BASE_URI, BASE_PATH'
-    )
-    process.exit(1)
-}
-
-const baseDestination = `${baseURI}:${port}`
-const fullPath = `${baseDestination}${basePath}`
-const fullPublicPath = publicURI ? `${publicURI}${basePath}` : fullPath;
+const exposedURI = `${baseURI}${basePath}`
 
 const router = initRouter;
 
-router.use("/swagger", swaggerInit, swaggerUiInit(fullPublicPath));
+router.use("/swagger", swaggerInit, swaggerUiInit(exposedURI));
 
 app.use(basePath, router)
 
@@ -39,10 +42,9 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`[server]: Server is running at ${baseDestination}`);
-    console.log(`[server]: Swagger UI is running at ${fullPublicPath}/swagger`);
-    console.log(`[server]: Swagger YAML is running at ${fullPath}/swagger.yaml`);
-    if (publicURI) {
-        console.log(`[server]: Server exposed at ${publicURI}`)
-    }
+    const swaggerUri = `http://localhost:${port}${basePath}/swagger`
+    console.log(`[server]: Server is running on port ${port}`);
+    console.log(`[server]: Swagger UI is running at ${swaggerUri}`);
+    console.log(`[server]: Swagger YAML is running at ${swaggerUri}.yaml`);
+    console.log(`[server]: Server can be exposed at ${exposedURI}`)
 });

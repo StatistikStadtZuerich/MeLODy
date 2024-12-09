@@ -4,9 +4,9 @@
   "main": "src/server.ts",
   "scripts": {
     "build:tsc": "tsc",
-    "start": "DEBUG_MODE=false node dist/server.js",
+    "start": "node dist/server.js",
     "build:start": "npm run build:tsc && npm run start",
-    "dev": "DEBUG_MODE=true nodemon",
+    "dev": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
