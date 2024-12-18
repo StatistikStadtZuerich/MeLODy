@@ -4,11 +4,13 @@
 
 **Projektname:** MeLODy
 
-Das Projekt MeLODy ist darauf ausgelegt, einen LLM Bot wie ChatGPT mit einer API zu verbinden. Der Bot
-übersetzt Benutzeranfragen in API-Anfragen, welche daraufhin die Daten verarbeiten und zurücksenden. ChatGPT analysiert
+Das Projekt MeLODy ist ein Proof of Concept und veranschaulicht, wie man strukturierte statistische Daten in einen ChatBOT integriert. 
+Der Bot übersetzt dabei Benutzeranfragen in API-Anfragen, welche daraufhin die Daten verarbeiten und zurücksenden. ChatGPT analysiert
 die Antwort, übersetzt sie in verständliche Worte und kann damit weiterarbeiten.
 
 [Link to ChatGPT Bot](https://chatgpt.com/g/g-673daf7008ac819180b306f2e2c3f802-melody)
+
+<video src='https://github.com/StatistikStadtZuerich/MeLODy/raw/refs/heads/main/videos/mel1.mp4' width=180 />
 
 ## Optimierung für ChatGPT
 
