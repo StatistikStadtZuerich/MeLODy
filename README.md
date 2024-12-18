@@ -1,16 +1,14 @@
 # MeLODy
 
-## Überblick
-
-**Projektname:** MeLODy
-
 Das Projekt MeLODy ist ein Proof of Concept und veranschaulicht, wie man strukturierte statistische Daten in einen Chatbot integriert. 
 Der Bot übersetzt dabei Benutzeranfragen in API-Anfragen, welche daraufhin die Daten verarbeiten und zurücksenden.
 Der Demonstrator beruht auf ChatGPT-Plus und verwendet die Möglichkeit, diesen mit Webservices zu verbinden.
 
 [Link zum Bot](https://chatgpt.com/g/g-673daf7008ac819180b306f2e2c3f802-melody)
 
-[<img alt="Einfacher Demochat" width="400px" src="images%2Fmel0.preview.png" />](https://www.youtube.com/watch?v=EDwDnLiYRKU)
+Video 1: Einfache Anfrage|Video 2: Konversation
+--|--
+[<img alt="Einfacher Demochat" width="360px" src="images%2Fmel0.preview.png" />](https://www.youtube.com/watch?v=EDwDnLiYRKU)|[<img alt="Demo-Konversation" width="360px" src="images%2Fmel1.preview.png" />](https://www.youtube.com/watch?v=Dc4dBXWYcfM)
 
 ## Beispielanfragen
 
@@ -26,8 +24,6 @@ Hier sind einige Beispielanfragen:
 7. **Wie hat sich das Einkommen über die letzten Jahre entwickelt?**
 8. **Wie haben sich die Mieten in Quartier XY entwickelt?**
 9. **Wie hat sich die Anzahl der Beschäftigten über die letzten Jahre verändert?**
-
-[<img alt="Demo-Konversation" width="400px" src="images%2Fmel1.preview.png" />](https://www.youtube.com/watch?v=Dc4dBXWYcfM)
 
 ## Lessons Learned: Optimierung für ChatGPT
 
