@@ -1,14 +1,24 @@
 import {Router} from "express";
-import {sszDataFetcher} from "../services/sszDataFetcher";
 import {IncomeData} from "../models/incomeData";
 import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
 import {bodyToIncomeDataRequest, filterIncomeData} from "../utils/incomeDataUtils";
+import queryMediator from "../services/QueryMediator";
+import {parseCSVFromAPI} from "../utils/csvUtils";
 
 const sszDataUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=af01ed91-04f8-445b-8dfc-04cbf0a27e95&limit=1000000";
 let results: IncomeData[] = [];
-sszDataFetcher<IncomeData>(sszDataUrl).then(result => {
-    console.log(`Downloaded ${result.length} income data from SSZ.`)
-    results = result
+// sszDataFetcher<IncomeData>(sszDataUrl).then(result => {
+//     console.log(`Downloaded ${result.length} income data from SSZ.`)
+//     results = result
+// })
+
+queryMediator.executeSparqlQuery("").then(async result => {
+    console.log(result)
+    if (result) {
+        results = await parseCSVFromAPI<IncomeData>(result);
+    }
+}).catch((error) => {
+    console.error(error);
 })
 const router = Router();
 

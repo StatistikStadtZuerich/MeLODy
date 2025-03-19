@@ -1,8 +1,9 @@
 import {Request, Response, Router} from 'express';
 import {DemographicData} from '../models/demographicData';
-import {readCSV} from "../utils/csvUtils";
 import {bodyToDemographicDataRequest, demographicDataFiltered} from "../utils/demographicDataUtils";
 import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
+import queryMediator from "../services/QueryMediator";
+import {parseCSVFromAPI} from "../utils/csvUtils";
 
 const sszDataUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=b2abdef7-3e3f-4883-8033-6787a1561987&limit=1000000";
 let data: DemographicData[] = [];
@@ -11,14 +12,21 @@ let data: DemographicData[] = [];
 //     data = result;
 // })
 
-readCSV<DemographicData>('./src/data/bev390od3903.csv')
-    .then(results => {
-        console.log(`Parsed ${results.length} demographic data from CSV.`);
-        data = results;
-    })
-    .catch(err => console.error(err));
+// readCSV<DemographicData>('./src/data/bev390od3903.csv')
+//     .then(results => {
+//         console.log(`Parsed ${results.length} demographic data from CSV.`);
+//         data = results;
+//     })
+//     .catch(err => console.error(err));
 
-
+queryMediator.executeSparqlQuery("").then(async result => {
+    console.log(result)
+    if (result) {
+        data = await parseCSVFromAPI<DemographicData>(result);
+    }
+}).catch((error) => {
+    console.error(error);
+})
 const router = Router();
 
 /**

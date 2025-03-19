@@ -1,17 +1,27 @@
 import {Router} from "express";
-import {sszDataFetcher} from "../services/sszDataFetcher";
 import {MietpreisData} from "../models/mietpreisData";
 import {bodyToMietpreisRequest, filterMietpreisData} from "../utils/mietpreisDataUtils";
 import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
+import queryMediator from "../services/QueryMediator";
+import {parseCSVFromAPI} from "../utils/csvUtils";
 
 const dataUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=1faf7e1b-0017-4a0a-8ffe-6077b4d597e4&limit=1000000"
 let data: MietpreisData[] = []
-sszDataFetcher<MietpreisData>(dataUrl).then(result => {
-    console.log(
-        `Downloaded ${result.length} mietpreis data from SSZ.`)
-    data = result
-})
+// sszDataFetcher<MietpreisData>(dataUrl).then(result => {
+//     console.log(
+//         `Downloaded ${result.length} mietpreis data from SSZ.`)
+//     data = result
+// })
 
+
+queryMediator.executeSparqlQuery("").then(async result => {
+    console.log(result)
+    if (result) {
+        data = await parseCSVFromAPI<MietpreisData>(result);
+    }
+}).catch((error) => {
+    console.error(error);
+})
 const router = Router();
 
 /**

@@ -1,17 +1,25 @@
 import {Router} from "express";
 import {ApartmentData} from "../models/ApartmentData";
-import {sszDataFetcher} from "../services/sszDataFetcher";
 import {bodyToApartmentDataRequest, filterApartmentData} from "../utils/apartmentDataUtils";
 import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
+import queryMediator from "../services/QueryMediator";
+import {parseCSVFromAPI} from "../utils/csvUtils";
 
 const sszUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=493d9be8-6511-4555-b09a-08d07741d5bd&limit=100000"
 let data: ApartmentData[] = []
-sszDataFetcher<ApartmentData>(sszUrl).then(result => {
-    console.log(
-        `Downloaded ${result.length} apartment data from SSZ.`)
-    data = result
+// sszDataFetcher<ApartmentData>(sszUrl).then(result => {
+//     console.log(
+//         `Downloaded ${result.length} apartment data from SSZ.`)
+//     data = result
+// })
+queryMediator.executeSparqlQuery("").then(async result => {
+    console.log(result)
+    if (result) {
+        data = await parseCSVFromAPI<ApartmentData>(result);
+    }
+}).catch((error) => {
+    console.error(error);
 })
-
 const router = Router();
 
 /**

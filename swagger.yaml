@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: 'API description'
 servers:
-  - url: 'https://ccb3-89-26-109-33.ngrok-free.app/api/v2'
+  - url: 'https://38a1-185-165-60-71.ngrok-free.app/api/v2'
     description: 'API server'
 paths:
   /apartments:
@@ -22,7 +22,7 @@ paths:
     post:
       summary: 'Filter and group employment data'
       description: 'Filters the employment data based on various parameters and groups the data if specified.'
-      operationId: filterAndGroupEmploymentData
+      operationId: employmentData
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/EmploymentDataRequest' } } } }
       responses: { '200': { description: 'Successful response with filtered (and possibly grouped) data.', content: { application/json: { schema: { type: object, properties: { keys: { type: array, items: { type: string } }, result: { type: object, description: 'Grouped data.' }, total: { type: integer, description: 'Total number of records.' }, source: { type: string, description: 'The source of the data' } } } } } }, '400': { description: 'Bad request due to invalid parameters.', content: { application/json: { schema: { type: object, properties: { error: { type: string } } } } } }, '404': { description: 'No data found for the specified parameters.', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
   /income:
@@ -38,6 +38,13 @@ paths:
       operationId: fetchMietpreisData
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MietpreisDataRequest' } } } }
       responses: { '200': { description: 'Successful response with Mietpreis data.', content: { application/json: { schema: { type: object, properties: { keys: { type: array, description: 'Array of keys by which the data was grouped.', items: { type: string } }, total: { type: number, description: 'Total number of grouped data items.' }, result: { type: object, description: 'The grouped data result.' }, source: { type: string, description: 'Source URL of the original data.' } } } } } }, '400': { description: 'Bad request.' }, '404': { description: 'No data found for the specified parameters.' } }
+  /population:
+    get:
+      summary: 'Retrieve population data'
+      description: 'Retrieve population data based on various filters such as year, startYear, endYear, minPopulation, maxPopulation.'
+      operationId: getPopulationNumbers
+      parameters: [ { in: query, name: year, schema: { type: string }, description: 'Filter by specific year' }, { in: query, name: startYear, schema: { type: string }, description: 'Filter by start year' }, { in: query, name: endYear, schema: { type: string }, description: 'Filter by end year' }, { in: query, name: minPopulation, schema: { type: integer }, description: 'Filter by minimum population' }, { in: query, name: maxPopulation, schema: { type: integer }, description: 'Filter by maximum population' } ]
+      responses: { '200': { description: 'A list of population data', content: { application/json: { schema: { type: object, properties: { total: { type: integer, description: 'The total number of population records' }, returned: { type: integer, description: 'The number of population records returned' }, source: { type: string, description: 'The source of the population data' }, data: { type: array, items: { $ref: '#/components/schemas/PopulationData' } } } } } } }, '404': { description: 'No data found for the specified parameters', content: { application/json: { schema: { type: object, properties: { error: { type: string, example: 'No data found for the specified parameters' } } } } } } }
 components:
   schemas:
     DemographicData:
@@ -48,8 +55,8 @@ components:
       properties: { _id: { type: integer, description: 'Unique identifier' }, StichtagDatJahr: { type: string, description: 'Reference year' }, QuarSort: { type: string, description: 'Sort order of the quarter' }, QuarCd: { type: string, description: 'Quarter code' }, QuarLang: { type: string, description: 'Full name of the quarter' }, SteuerTarifSort: { type: string, description: 'Tax tariff sort order' }, SteuerTarifCd: { type: string, description: 'Tax tariff code' }, SteuerTarifLang: { type: string, description: 'Full name of the tax tariff' }, SteuerEinkommen_p50: { type: number, description: 'Median income' }, SteuerEinkommen_p25: { type: number, description: '25th percentile income' }, SteuerEinkommen_p75: { type: number, description: '75th percentile income' } }
     PopulationData:
       type: object
-      properties: { _id: { type: integer, description: 'The unique identifier for the population data' }, StichtagDatJahr: { type: string, description: 'The year of the population data' }, AnzBestWir: { type: integer, description: 'The number of people' } }
-      required: [ _id, StichtagDatJahr, AnzBestWir ]
+      properties: { Jahr: { type: string, description: 'The year of the population data' }, Wirtschaftliche_Wohnbevoelkerung: { type: integer, description: 'The number of people' } }
+      required: [ Jahr, Wirtschaftliche_Wohnbevoelkerung ]
     ApartmentDataRequest:
       type: object
       properties: { startYear: { type: integer, example: 2020 }, endYear: { type: integer, example: 2025 }, year: { type: integer, example: 2021 }, quar: { type: string, example: Rathaus }, kreis: { type: integer, example: 1, minimum: 1, maximum: 12 }, minRooms: { type: integer, example: 1, minimum: 1 }, maxRooms: { type: integer, example: 5, minimum: 1 }, rooms: { type: integer, example: 3, minimum: 1 }, owner: { type: string, enum: [ 'Öffentliche Hand', 'Übrige private Gesellschaften', 'Natürliche Personen', 'Im Stockwerkeigentum', Wohnbaugenossenschaften ], example: 'Natürliche Personen' }, numberOfApartments: { type: integer, example: 100, minimum: 1, maximum: 1000 }, groupBy: { type: array, items: { type: string }, example: [ StichtagDatJahr, DatenstandCd, QuarLang, KreisLang, EigentuemerSSZPubl1Lang, AnzZimmerLevel2Lang_noDM, AnzWhgStat ] } }
@@ -58,7 +65,7 @@ components:
       properties: { startYear: { type: integer, description: 'The starting year for filtering data', example: 2000 }, endYear: { type: integer, description: 'The ending year for filtering data', example: 2020 }, year: { type: integer, description: 'A specific year for filtering data', example: 2010 }, sex: { type: string, enum: [ M, F ], description: 'The gender for filtering data', example: M }, minAge: { type: integer, description: 'The minimum age for filtering data', example: 18, minimum: 0, maximum: 120 }, maxAge: { type: integer, description: 'The maximum age for filtering data', example: 65, minimum: 0, maximum: 120 }, age: { type: integer, description: 'The specific age for filtering data', example: 30, minimum: 0, maximum: 120 }, kreis: { type: integer, description: 'The district for filtering data', example: 1, minimum: 1, maximum: 12 }, quar: { type: string, description: 'The neighborhood for filtering data', example: Altstadt }, herkunft: { type: string, enum: [ 'Schweizer*in', 'Ausländer*in' ], description: 'The origin for filtering data', example: 'Schweizer*in' }, groupBy: { type: array, items: { type: string }, description: 'Fields to group the results by', example: [ year, sex ], enum: [ sex, herkunft, year, kreis, quar, age, population ] } }
     EmploymentDataRequest:
       type: object
-      properties: { startYear: { type: integer, description: 'The start year for filtering employment data.', example: 2000 }, endYear: { type: integer, description: 'The end year for filtering employment data.', example: 2020 }, year: { type: integer, description: 'The specific year for filtering employment data.', example: 2010 }, startQuartal: { type: integer, description: 'The start quarter for filtering employment data.', example: 1, minimum: 1, maximum: 4 }, endQuartal: { type: integer, description: 'The end quarter for filtering employment data.', example: 4, minimum: 1, maximum: 4 }, quartal: { type: integer, description: 'The specific quarter for filtering employment data.', example: 2, minimum: 1, maximum: 4 }, groupBy: { type: array, items: { type: string, enum: [ year, quarter, allEmployed, fullTime ] }, description: 'List of keys to group the data by.', example: [ year, quarter ] } }
+      properties: { startDate: { type: integer, description: 'The start year for filtering employment data.', example: 2000 }, endDate: { type: integer, description: 'The end year for filtering employment data.', example: 2020 }, date: { type: integer, description: 'The specific year for filtering employment data.', example: 2010 }, groupBy: { type: array, items: { type: string, enum: [ year, allEmployed, fullTime ] }, description: 'List of keys to group the data by.', example: [ year, fullTime ] } }
     IncomeDataRequest:
       type: object
       properties: { startYear: { type: integer, description: 'Start year for the income data' }, endYear: { type: integer, description: 'End year for the income data' }, year: { type: integer, description: 'Specific year for the income data' }, quar: { type: string, description: 'Quarter for the income data' }, tarif: { type: string, enum: [ Grundtarif, Verheiratetentarif, Einelternfamilientarif ], description: 'Tax tariff' }, taxIncome_p50: { type: number, description: 'Median income' }, taxIncome_p25: { type: number, description: '25th percentile income' }, taxIncome_p75: { type: number, description: '75th percentile income' }, groupBy: { type: array, items: { type: string, enum: [ year, quar, tarif, taxIncome_p50, taxIncome_p25, taxIncome_p75 ] }, description: 'Group by criteria' } }
