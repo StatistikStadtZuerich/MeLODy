@@ -12,8 +12,24 @@ let data: ApartmentData[] = []
 //         `Downloaded ${result.length} apartment data from SSZ.`)
 //     data = result
 // })
-queryMediator.executeSparqlQuery("").then(async result => {
-    console.log(result)
+
+const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Zimmerzahl ?Eigentumsart ?Bauperiode ?Miete_oder_Eigentum (xsd:integer(?Anzahl_Wohnungen_decimal) AS ?Anzahl_Wohnungen) WHERE {
+    <https://ld.stadt-zuerich.ch/statistics/000579/observation> cube:observation [
+        sszP:ZEIT/schema:inDefinedTermSet sszTS:Jahr;
+        sszP:RAUM/schema:inDefinedTermSet sszTS:QuartiereZH;
+        sszP:RAUM/schema:name ?Stadtquartier;
+        sszP:TIME ?Datum;
+        sszP:ZIM/schema:name ?Zimmerzahl;
+        sszP:EIG/schema:name ?Eigentumsart;
+        sszP:BAP/schema:name ?Bauperiode;
+        sszP:MWF ?Mietflag;
+        sszM:WHG ?Anzahl_Wohnungen_decimal
+    ]
+    BIND(IF(?Mietflag = <https://ld.stadt-zuerich.ch/statistics/code/MWF0001>, "Miete", "Eigentum") AS ?Miete_oder_Eigentum)
+    FILTER(regex(str(?Datum),".*-12-31","i")) # TODO should be removed when fix is done
+} ORDER BY ?Stadtquartier ?Zimmerzahl ?Eigentumsart ?Bauperiode ?Miete_oder_Eigentum`;
+
+queryMediator.executeSparqlQuery(query).then(async result => {
     if (result) {
         data = await parseCSVFromAPI<ApartmentData>(result);
     }
@@ -40,19 +56,7 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 keys:
- *                   type: array
- *                   items:
- *                     type: string
- *                 total:
- *                   type: integer
- *                 result:
- *                   type: object
- *                 source:
- *                   type: string
- *                   description: The source of the data
+ *               $ref: '#/components/schemas/DataResponse'
  *       404:
  *         description: No data found for the specified parameters
  *         content:
@@ -76,8 +80,8 @@ router.post('/', async (req, res) => {
         return;
     }
     let subroutes = requestBody.groupBy || [];
-    if (!subroutes.includes('AnzWhgStat')) {
-        subroutes.push('AnzWhgStat');
+    if (!subroutes.includes('Anzahl_Wohnungen')) {
+        subroutes.push('Anzahl_Wohnungen');
     }
     res.status(200).json({...groupDataByQueryParamsCombined(filteredData, subroutes, {sum: true}), source: sszUrl});
 })

@@ -6,18 +6,16 @@ import {EmploymentData} from "../employmentData";
  *   schemas:
  *     EmploymentDataRequest:
  *       type: object
+ *       description: Filter options for employment data queries including time range parameters and grouping dimensions.
  *       properties:
  *         startDate:
  *           type: integer
- *           description: The start year for filtering employment data.
  *           example: 2000
  *         endDate:
  *           type: integer
- *           description: The end year for filtering employment data.
  *           example: 2020
  *         date:
  *           type: integer
- *           description: The specific year for filtering employment data.
  *           example: 2010
  *         groupBy:
  *           type: array
@@ -27,7 +25,6 @@ import {EmploymentData} from "../employmentData";
  *               - year
  *               - allEmployed
  *               - fullTime
- *           description: List of keys to group the data by.
  *           example: ["year", "fullTime"]
  */
 export interface EmploymentDataRequest {

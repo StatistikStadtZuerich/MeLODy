@@ -34,65 +34,38 @@ const router = Router();
  * /population:
  *   get:
  *     summary: Retrieve population data
- *     description: Retrieve population data based on various filters such as year, startYear, endYear, minPopulation, maxPopulation.
+ *     description: Retrieve overall population numbers with optional filtering by year range (year, startYear, endYear) and population range (minPopulation, maxPopulation).
  *     operationId: getPopulationNumbers
  *     parameters:
  *       - in: query
  *         name: year
  *         schema:
  *           type: string
- *         description: Filter by specific year
  *       - in: query
  *         name: startYear
  *         schema:
  *           type: string
- *         description: Filter by start year
  *       - in: query
  *         name: endYear
  *         schema:
  *           type: string
- *         description: Filter by end year
  *       - in: query
  *         name: minPopulation
  *         schema:
  *           type: integer
- *         description: Filter by minimum population
  *       - in: query
  *         name: maxPopulation
  *         schema:
  *           type: integer
- *         description: Filter by maximum population
  *     responses:
  *       200:
  *         description: A list of population data
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 total:
- *                   type: integer
- *                   description: The total number of population records
- *                 returned:
- *                   type: integer
- *                   description: The number of population records returned
- *                 source:
- *                   type: string
- *                   description: The source of the population data
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/PopulationData'
+ *               $ref: '#/components/schemas/DataResponse'
  *       404:
  *         description: No data found for the specified parameters
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: No data found for the specified parameters
  */
 router.get('/', async (req, res) => {
     const {year, startYear, endYear, minPopulation, maxPopulation, offset, limit, sortBy, sortAsc} = req.query;

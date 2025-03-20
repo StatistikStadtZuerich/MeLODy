@@ -12,8 +12,19 @@ let results: IncomeData[] = [];
 //     results = result
 // })
 
-queryMediator.executeSparqlQuery("").then(async result => {
-    console.log(result)
+const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Haushaltstyp ?Haushaltsäquivalenzeinkommen_Median_in_1000_CHF WHERE {
+    <https://ld.stadt-zuerich.ch/statistics/000608/observation> cube:observation [
+        sszP:ZEIT/schema:inDefinedTermSet sszTS:Jahr;
+        sszP:RAUM/schema:inDefinedTermSet sszTS:QuartiereZH;
+        sszP:RAUM/schema:name ?Stadtquartier;
+        sszP:TIME ?Datum;
+        sszP:HTY/schema:name ?Haushaltstyp;
+        sszM:HAE ?Haushaltsäquivalenzeinkommen_Median_in_1000_CHF
+    ]
+    FILTER(regex(str(?Datum),".*-12-31","i")) # TODO should be removed when fix is done
+} ORDER BY ?Datum_nach_Jahr ?Stadtquartier ?Haushaltstyp`;
+
+queryMediator.executeSparqlQuery(query).then(async result => {
     if (result) {
         results = await parseCSVFromAPI<IncomeData>(result);
     }
@@ -39,23 +50,9 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 keys:
- *                   type: array
- *                   items:
- *                     type: string
- *                 result:
- *                   type: object
- *                 total:
- *                   type: integer
- *                 source:
- *                   type: string
- *                   description: The source of the data
+ *               $ref: '#/components/schemas/DataResponse'
  *       404:
  *         description: No data found for the specified parameters or no subroutes specified
- *       500:
- *         description: Internal Server Error
  */
 router.post('/', async (req, res) => {
     try {
@@ -68,7 +65,7 @@ router.post('/', async (req, res) => {
             res.status(404).json({message: 'No data found for the specified parameters'});
             return;
         }
-        const groupedData = groupDataByQueryParamsCombined(filteredData, ['StichtagDatJahr', 'QuarLang', 'SteuerTarifLang', 'SteuerEinkommen_p50'], {statisticalSummaries: false});
+        const groupedData = groupDataByQueryParamsCombined(filteredData, requestObject.groupBy, {statisticalSummaries: false});
         res.status(200).json({...groupedData, source: sszDataUrl});
     } catch (error) {
         console.error('An error occurred:', error);

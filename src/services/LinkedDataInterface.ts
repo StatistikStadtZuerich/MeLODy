@@ -19,6 +19,7 @@ export class LinkedDataInterface {
     private readonly retryDelay: number;
     private sourceConfigs: SourceConfigs;
     private sourceConfigsLoaded: boolean;
+    private runQueue: string[] = []
 
     constructor(options: LinkedDataInterfaceOptions = {}) {
         this.configPath = options.configPath || path.join(__dirname, 'config', 'sources.json');
@@ -232,33 +233,45 @@ export class LinkedDataInterface {
     async executeWithRetry(options: AxiosRequestConfig): Promise<any> {
         let lastError: Error | AxiosError | unknown;
 
-        for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-            try {
-                const response = await axios(options);
-                return response.data;
-            } catch (error) {
-                lastError = error;
-
-                const isRetryable = this.isRetryableError(error);
-                if (!isRetryable || attempt === this.maxRetries) {
-                    break;
-                }
-
-                await this.delay(this.retryDelay * attempt);
-            }
+        while (this.runQueue.length > 0) {
+            await this.delay(100);
         }
 
-        const axiosError = lastError as AxiosError;
-        // @ts-ignore
-        const errorMessage = axiosError.response?.data?.error ||
-            (axiosError.message || 'Unknown error');
-        const errorCode = axiosError.response?.status || 500;
+        this.runQueue.push('process');
 
-        throw new LinkedDataError(
-            `Query failed after ${this.maxRetries} attempts: ${errorMessage}`,
-            `QUERY_FAILED_${errorCode}`,
-            errorCode
-        );
+        try {
+            for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+                try {
+                    console.log(`Executing query on ${options.url}: attempt ${attempt} of ${this.maxRetries}...`);
+                    const response = await axios(options);
+                    console.log(`Query executed successfully on ${options.url}`);
+                    return response.data;
+                } catch (error) {
+                    lastError = error;
+
+                    const isRetryable = this.isRetryableError(error);
+                    if (!isRetryable || attempt === this.maxRetries) {
+                        break;
+                    }
+
+                    await this.delay(this.retryDelay * attempt);
+                }
+            }
+
+            const axiosError = lastError as AxiosError;
+            // @ts-ignore
+            const errorMessage = axiosError.response?.data?.error ||
+                (axiosError.message || 'Unknown error');
+            const errorCode = axiosError.response?.status || 500;
+
+            throw new LinkedDataError(
+                `Query failed after ${this.maxRetries} attempts: ${errorMessage}`,
+                `QUERY_FAILED_${errorCode}`,
+                errorCode
+            );
+        } finally {
+            this.runQueue.shift();
+        }
     }
 
     isRetryableError(error: unknown): boolean {

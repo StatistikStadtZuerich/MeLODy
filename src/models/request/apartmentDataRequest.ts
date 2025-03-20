@@ -6,6 +6,7 @@ import {ApartmentData} from "../ApartmentData";
  *   schemas:
  *     ApartmentDataRequest:
  *       type: object
+ *       description: Filter options for apartment data queries including time range, location, room specifications, ownership type, apartment count, and grouping dimensions.
  *       properties:
  *         startYear:
  *           type: integer
@@ -19,22 +20,14 @@ import {ApartmentData} from "../ApartmentData";
  *         quar:
  *           type: string
  *           example: "Rathaus"
- *         kreis:
- *           type: integer
- *           example: 1
- *           minimum: 1
- *           maximum: 12
  *         minRooms:
  *           type: integer
- *           example: 1
  *           minimum: 1
  *         maxRooms:
  *           type: integer
- *           example: 5
  *           minimum: 1
  *         rooms:
  *           type: integer
- *           example: 3
  *           minimum: 1
  *         owner:
  *           type: string
@@ -47,29 +40,26 @@ import {ApartmentData} from "../ApartmentData";
  *           example: 'Natürliche Personen'
  *         numberOfApartments:
  *           type: integer
- *           example: 100
  *           minimum: 1
- *           maximum: 1000
  *         groupBy:
  *           type: array
  *           items:
  *             type: string
- *           example: [
- *             'StichtagDatJahr',
- *             'DatenstandCd',
- *             'QuarLang',
- *             'KreisLang',
- *             'EigentuemerSSZPubl1Lang',
- *             'AnzZimmerLevel2Lang_noDM',
- *             'AnzWhgStat'
- *           ]
+ *             enum:
+ *               - 'Datum_nach_Jahr'
+ *               - 'Stadtquartier'
+ *               - 'Zimmerzahl'
+ *               - 'Eigentumsart'
+ *               - 'Bauperiode'
+ *               - 'Miete_oder_Eigentum'
+ *               - 'Anzahl_Wohnungen'
+ *           example: ['Datum_nach_Jahr', 'Stadtquartier']
  */
 export interface ApartmentDataRequest {
     startYear?: number;
     endYear?: number;
     year?: number;
     quar?: string;
-    kreis?: number;
     minRooms?: number;
     maxRooms?: number;
     rooms?: number;

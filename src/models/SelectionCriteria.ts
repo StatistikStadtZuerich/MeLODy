@@ -1,5 +1,5 @@
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     SelectionCriteria:
@@ -26,7 +26,7 @@ export interface SelectionCriteria<T> {
 }
 
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     SimpleSelectionCriteria:

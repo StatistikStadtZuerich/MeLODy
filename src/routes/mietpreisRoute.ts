@@ -42,24 +42,7 @@ const router = Router();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 keys:
- *                   type: array
- *                   description: Array of keys by which the data was grouped.
- *                   items:
- *                     type: string
- *                 total:
- *                   type: number
- *                   description: Total number of grouped data items.
- *                 result:
- *                   type: object
- *                   description: The grouped data result.
- *                 source:
- *                   type: string
- *                   description: Source URL of the original data.
- *       400:
- *         description: Bad request.
+ *               $ref: '#/components/schemas/DataResponse'
  *       404:
  *         description: No data found for the specified parameters.
  */

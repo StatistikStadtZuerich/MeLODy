@@ -16,46 +16,32 @@ import {IncomeData} from "../incomeData";
  *         year:
  *           type: integer
  *           description: Specific year for the income data
- *         quar:
+ *         district:
  *           type: string
- *           description: Quarter for the income data
- *         tarif:
+ *           description: District/quarter name (Stadtquartier)
+ *         householdType:
  *           type: string
- *           enum:
- *             - Grundtarif
- *             - Verheiratetentarif
- *             - Einelternfamilientarif
- *           description: Tax tariff
- *         taxIncome_p50:
+ *           description: Type of household (Haushaltstyp)
+ *         medianIncome:
  *           type: number
- *           description: Median income
- *         taxIncome_p25:
- *           type: number
- *           description: 25th percentile income
- *         taxIncome_p75:
- *           type: number
- *           description: 75th percentile income
+ *           description: Median equivalent household income in 1000 CHF
  *         groupBy:
  *           type: array
  *           items:
  *             type: string
  *             enum:
  *               - year
- *               - quar
- *               - tarif
- *               - taxIncome_p50
- *               - taxIncome_p25
- *               - taxIncome_p75
+ *               - district
+ *               - householdType
+ *               - medianIncome
  *           description: Group by criteria
  */
 export interface IncomeDataRequest {
     startYear?: number;
     endYear?: number;
     year?: number;
-    quar?: string;
-    tarif?: 'Grundtarif' | 'Verheiratetentarif' | 'Einelternfamilientarif';
-    taxIncome_p50?: number;
-    taxIncome_p25?: number;
-    taxIncome_p75?: number;
+    district?: string;
+    householdType?: string;
+    medianIncome?: number;
     groupBy: (keyof IncomeData)[];
 }

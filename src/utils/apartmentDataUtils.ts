@@ -1,17 +1,17 @@
 import {Request} from 'express';
 import {ApartmentDataRequest} from "../models/request/apartmentDataRequest";
-import {intOrUndefined, isNumber, numberOrUndefined} from "./numberUtils";
+import {intOrUndefined} from "./numberUtils";
 import {ApartmentData} from "../models/ApartmentData";
 import {mapItemsAsKeys} from "./dataUtils";
 
 export const apartmentDataKeyMap: Record<string, keyof ApartmentData> = {
-    year: 'StichtagDatJahr',
-    datenstand: 'DatenstandCd',
-    neighborhood: 'QuarLang',
-    kreis: 'KreisLang',
-    owner: 'EigentuemerSSZPubl1Lang',
-    rooms: 'AnzZimmerLevel2Lang_noDM',
-    apartmentNumber: 'AnzWhgStat'
+    year: 'Datum_nach_Jahr',
+    neighborhood: 'Stadtquartier',
+    rooms: 'Zimmerzahl',
+    ownership: 'Eigentumsart',
+    constructionPeriod: 'Bauperiode',
+    rentOrOwnership: 'Miete_oder_Eigentum',
+    apartmentNumber: 'Anzahl_Wohnungen'
 }
 
 export const bodyToApartmentDataRequest = (req: Request): ApartmentDataRequest => {
@@ -19,7 +19,6 @@ export const bodyToApartmentDataRequest = (req: Request): ApartmentDataRequest =
         startYear,
         endYear,
         year,
-        kreis,
         quar,
         minRooms,
         maxRooms,
@@ -33,7 +32,6 @@ export const bodyToApartmentDataRequest = (req: Request): ApartmentDataRequest =
         startYear: intOrUndefined(startYear),
         endYear: intOrUndefined(endYear),
         year: intOrUndefined(year),
-        kreis: intOrUndefined(kreis),
         quar,
         minRooms: intOrUndefined(minRooms),
         maxRooms: intOrUndefined(maxRooms),
@@ -50,7 +48,6 @@ export const filterApartmentData = (data: ApartmentData[], request: ApartmentDat
         endYear,
         year,
         quar,
-        kreis,
         minRooms,
         maxRooms,
         rooms,
@@ -62,27 +59,36 @@ export const filterApartmentData = (data: ApartmentData[], request: ApartmentDat
     const yearInt = intOrUndefined(year);
 
     return data.filter(item => {
-
-        if (isNumber(item.StichtagDatJahr) && (startYearInt || endYearInt || yearInt)) {
-            const itemYear = intOrUndefined(item.StichtagDatJahr)!;
-            if (yearInt && itemYear !== yearInt) return false;
-            if (startYearInt && itemYear < startYearInt) return false;
-            if (endYearInt && itemYear > endYearInt) return false;
+        // Filter by year
+        if (yearInt || startYearInt || endYearInt) {
+            const itemYear = intOrUndefined(item.Datum_nach_Jahr);
+            if (itemYear) {
+                if (yearInt && itemYear !== yearInt) return false;
+                if (startYearInt && itemYear < startYearInt) return false;
+                if (endYearInt && itemYear > endYearInt) return false;
+            }
         }
 
-        if (kreis && numberOrUndefined(item.KreisCd) !== kreis) return false;
+        // Filter by district/quarter
+        if (quar && !item.Stadtquartier.includes(quar)) return false;
 
-        if (isNumber(item.AnzZimmerLevel2Cd_noDM) && (rooms || minRooms || maxRooms)) {
-            const roomsInt = intOrUndefined(item.AnzZimmerLevel2Cd_noDM)!;
-            if (rooms && roomsInt !== rooms) return false;
-            if (minRooms && roomsInt < minRooms) return false;
-            if (maxRooms && roomsInt > maxRooms) return false;
+        // Filter by rooms
+        if (rooms || minRooms || maxRooms) {
+            // Assuming Zimmerzahl can be converted to a number for comparison
+            const roomsNum = parseInt(item.Zimmerzahl);
+            if (!isNaN(roomsNum)) {
+                if (rooms && roomsNum !== rooms) return false;
+                if (minRooms && roomsNum < minRooms) return false;
+                if (maxRooms && roomsNum > maxRooms) return false;
+            }
         }
-        if (owner && item.EigentuemerSSZPubl1Lang !== owner) return false;
-        if (numberOfApartments && intOrUndefined(item.AnzWhgStat) !== numberOfApartments) return false;
-        if (quar && !item.QuarLang.includes(quar)) return false;
+
+        // Filter by ownership type
+        if (owner && item.Eigentumsart !== owner) return false;
+
+        // Filter by number of apartments
+        if (numberOfApartments && item.Anzahl_Wohnungen !== numberOfApartments) return false;
 
         return true;
     });
 }
-

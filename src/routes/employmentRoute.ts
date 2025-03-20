@@ -51,40 +51,9 @@ const router = Router()
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 keys:
- *                   type: array
- *                   items:
- *                     type: string
- *                 result:
- *                   type: object
- *                   description: Grouped data.
- *                 total:
- *                   type: integer
- *                   description: Total number of records.
- *                 source:
- *                   type: string
- *                   description: The source of the data
+ *               $ref: '#/components/schemas/DataResponse'
  *       404:
  *         description: No data found for the specified parameters.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: No data found for the specified parameters
- *       400:
- *         description: Bad request due to invalid parameters.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
  */
 router.post('/', async (req, res) => {
     try {

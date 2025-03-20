@@ -6,43 +6,34 @@ import {MietpreisData} from "../mietpreisData";
  *   schemas:
  *     MietpreisDataRequest:
  *       type: object
+ *       description: Filter options for rental price data queries including time ranges, area specifications, room configurations, property types, and grouping dimensions.
  *       properties:
  *         startYear:
  *           type: integer
- *           description: The start year of the request
  *           example: 2020
  *         endYear:
  *           type: integer
- *           description: The end year of the request
  *           example: 2021
  *         year:
  *           type: integer
- *           description: A specific year for the request
  *           example: 2022
  *         areaType:
  *           type: string
  *           enum: ['Ganze Stadt', 'Stadtkreise', 'Stadtquartiere', 'Statistische Quartiere']
- *           description: Type of area
  *           example: 'Ganze Stadt'
  *         minNumberOfRooms:
  *           type: integer
- *           description: Minimum number of rooms
  *           example: 2
  *           minimum: 1
  *         maxNumberOfRooms:
  *           type: integer
- *           description: Maximum number of rooms
- *           example: 4
  *           minimum: 1
  *         numberOfRooms:
  *           type: integer
- *           description: Specific number of rooms
- *           example: 3
  *           minimum: 1
  *         gemein:
  *           type: string
  *           enum: ['Gemeinnützig', 'Nicht gemeinnützig']
- *           description: Indicates if it is profit
  *           example: 'Gemeinnützig'
  *         groupBy:
  *           type: array
@@ -59,7 +50,6 @@ import {MietpreisData} from "../mietpreisData";
  *               'qu50',
  *               'qu75',
  *             ]
- *           description: Grouping fields
  *           example: ['StichtagDatJahr', 'ZimmerSort']
  */
 export interface MietpreisDataRequest {

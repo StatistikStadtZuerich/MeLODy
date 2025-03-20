@@ -17,6 +17,7 @@ PREFIX schema: <https://schema.org/>
 PREFIX sszP: <https://ld.stadt-zuerich.ch/statistics/property/>
 PREFIX sszM: <https://ld.stadt-zuerich.ch/statistics/measure/>
 PREFIX sszTS: <https://ld.stadt-zuerich.ch/statistics/termset/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 `;
 
 export class QueryMediator {
@@ -70,10 +71,10 @@ export class QueryMediator {
 
             return this.formatter.format(results, format);
         } catch (error) {
+            console.error('Error executing SPARQL query:', error);
             if (error instanceof QueryError) {
                 return undefined;
             }
-            console.error('Error executing SPARQL query:', error);
         }
     }
 }
