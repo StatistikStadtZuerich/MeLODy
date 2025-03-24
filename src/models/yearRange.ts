@@ -1,5 +1,5 @@
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     YearRange:

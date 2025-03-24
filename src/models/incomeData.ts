@@ -1,54 +1,26 @@
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     IncomeData:
  *       type: object
  *       properties:
- *         _id:
- *           type: integer
- *           description: Unique identifier
- *         StichtagDatJahr:
+ *         Datum_nach_Jahr:
  *           type: string
- *           description: Reference year
- *         QuarSort:
+ *           description: Year extracted from the date
+ *         Stadtquartier:
  *           type: string
- *           description: Sort order of the quarter
- *         QuarCd:
+ *           description: Name of the district/quarter
+ *         Haushaltstyp:
  *           type: string
- *           description: Quarter code
- *         QuarLang:
- *           type: string
- *           description: Full name of the quarter
- *         SteuerTarifSort:
- *           type: string
- *           description: Tax tariff sort order
- *         SteuerTarifCd:
- *           type: string
- *           description: Tax tariff code
- *         SteuerTarifLang:
- *           type: string
- *           description: Full name of the tax tariff
- *         SteuerEinkommen_p50:
+ *           description: Type of household
+ *         Haushaltsäquivalenzeinkommen_Median_in_1000_CHF:
  *           type: number
- *           description: Median income
- *         SteuerEinkommen_p25:
- *           type: number
- *           description: 25th percentile income
- *         SteuerEinkommen_p75:
- *           type: number
- *           description: 75th percentile income
+ *           description: Median equivalent household income in 1000 CHF
  */
 export interface IncomeData {
-    _id: number;
-    StichtagDatJahr: string;
-    QuarSort: string;
-    QuarCd: string;
-    QuarLang: string;
-    SteuerTarifSort: string;
-    SteuerTarifCd: string;
-    SteuerTarifLang: string;
-    SteuerEinkommen_p50: number;
-    SteuerEinkommen_p25: number;
-    SteuerEinkommen_p75: number;
+    Datum_nach_Jahr: string;
+    Stadtquartier: string;
+    Haushaltstyp: string;
+    Haushaltsäquivalenzeinkommen_Median_in_1000_CHF: number;
 }

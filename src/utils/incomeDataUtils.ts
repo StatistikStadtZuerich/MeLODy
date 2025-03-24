@@ -10,37 +10,29 @@ export const bodyToIncomeDataRequest = (req: Request): IncomeDataRequest => {
         startYear,
         endYear,
         year,
-        quar,
-        tarif,
-        taxIncome_p50,
-        taxIncome_p25,
-        taxIncome_p75,
+        district,
+        householdType,
+        medianIncome,
         groupBy = []
     } = req.body || {};
-
 
     return {
         startYear: intOrUndefined(startYear),
         endYear: intOrUndefined(endYear),
         year: intOrUndefined(year),
-        quar: toValidString(quar),
-        tarif: tarif,
-        taxIncome_p50: numberOrUndefined(taxIncome_p50),
-        taxIncome_p25: numberOrUndefined(taxIncome_p25),
-        taxIncome_p75: numberOrUndefined(taxIncome_p75),
+        district: toValidString(district),
+        householdType: toValidString(householdType),
+        medianIncome: numberOrUndefined(medianIncome),
         groupBy: mapItemsAsKeys(groupBy, incomeKeyMap)
     };
 };
 
 export const incomeKeyMap: Record<string, keyof IncomeData> = {
-    year: "StichtagDatJahr",
-    quar: "QuarLang",
-    tarif: 'SteuerTarifLang',
-    taxIncome_p50: 'SteuerEinkommen_p50',
-    taxIncome_p25: 'SteuerEinkommen_p25',
-    taxIncome_p75: 'SteuerEinkommen_p75',
+    year: "Datum_nach_Jahr",
+    district: "Stadtquartier",
+    householdType: "Haushaltstyp",
+    medianIncome: "Haushaltsäquivalenzeinkommen_Median_in_1000_CHF"
 }
-
 
 /**
  * Filters the provided income data based on the criteria specified in the request object.
@@ -50,23 +42,19 @@ export const incomeKeyMap: Record<string, keyof IncomeData> = {
  */
 export const filterIncomeData = (data: IncomeData[], req: IncomeDataRequest): IncomeData[] =>
     data.filter((item) => {
-        const intYear = intOrUndefined(item.StichtagDatJahr);
+        const intYear = intOrUndefined(item.Datum_nach_Jahr);
 
         const matchesStartYear = intYear && req.startYear ? intYear >= req.startYear : true;
         const matchesEndYear = intYear && req.endYear ? intYear <= req.endYear : true;
         const matchesYear = intYear && req.year ? intYear === req.year : true;
-        const matchesQuarter = req.quar ? item.QuarLang === req.quar : true;
-        const matchesTarif = req.tarif ? item.SteuerTarifLang === req.tarif : true;
-        const matchesTaxIncomeP50 = req.taxIncome_p50 ? item.SteuerEinkommen_p50 === req.taxIncome_p50 : true;
-        const matchesTaxIncomeP25 = req.taxIncome_p25 ? item.SteuerEinkommen_p25 === req.taxIncome_p25 : true;
-        const matchesTaxIncomeP75 = req.taxIncome_p75 ? item.SteuerEinkommen_p75 === req.taxIncome_p75 : true;
+        const matchesDistrict = req.district ? item.Stadtquartier === req.district : true;
+        const matchesHouseholdType = req.householdType ? item.Haushaltstyp === req.householdType : true;
+        const matchesMedianIncome = req.medianIncome ? item.Haushaltsäquivalenzeinkommen_Median_in_1000_CHF === req.medianIncome : true;
 
         return matchesStartYear &&
             matchesEndYear &&
             matchesYear &&
-            matchesQuarter &&
-            matchesTarif &&
-            matchesTaxIncomeP50 &&
-            matchesTaxIncomeP25 &&
-            matchesTaxIncomeP75;
+            matchesDistrict &&
+            matchesHouseholdType &&
+            matchesMedianIncome;
     });

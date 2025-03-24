@@ -1,0 +1,8 @@
+{
+  "ssz": {
+    "type": "sparql",
+    "endpoint": "https://ld.test.stzh.ch/query",
+    "format": "csv",
+    "timeout": 45000
+  }
+}
