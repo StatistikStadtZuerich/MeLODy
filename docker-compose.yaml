@@ -12,4 +12,4 @@ services:
       - PORT=3003
       - BASE_URI=http://localhost
       - BASE_PATH=/api/v1
-      - PUBLIC_URI=https://melody1-1-server.ssz.redlink.io
+      - PUBLIC_URI=https://melody-1-1-server.ssz.redlink.io
