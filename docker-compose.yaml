@@ -7,8 +7,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3002:3002"
+      - "3003:3003"
     environment:
-      - PORT=3002
+      - PORT=3003
       - BASE_URI=http://localhost
       - BASE_PATH=/api/v1
+      - PUBLIC_URI=https://melody1-1-server.ssz.redlink.io
