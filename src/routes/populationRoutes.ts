@@ -1,8 +1,6 @@
 import {PopulationData} from "../models/populationData";
 import {Router} from "express";
 import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
-import queryMediator from "../services/QueryMediator";
-import {parseCSVFromAPI} from "../utils/csvUtils";
 
 const populationQueryUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=9bacf5c9-a8c0-416d-a162-3b5f0a2d300d&limit=1000";
 let results: PopulationData[] = [];
@@ -20,17 +18,17 @@ const query = `SELECT (year(?Datum) AS ?Jahr) ?Wirtschaftliche_Wohnbevoelkerung 
   ]
 } 
 ORDER BY ?Jahr`;
-queryMediator.executeSparqlQuery(query).then(async result => {
-    if (result) {
-        results = await parseCSVFromAPI<PopulationData>(result);
-    }
-}).catch((error) => {
-    console.error(error);
-})
+// queryMediator.executeSparqlQuery(query).then(async result => {
+//     if (result) {
+//         results = await parseCSVFromAPI<PopulationData>(result);
+//     }
+// }).catch((error) => {
+//     console.error(error);
+// })
 const router = Router();
 
 /**
- * @swagger
+ // * @swagger
  * /population:
  *   get:
  *     summary: Retrieve population data

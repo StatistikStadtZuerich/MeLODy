@@ -1,7 +1,7 @@
 import {MietpreisData} from "../mietpreisData";
 
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     MietpreisDataRequest:

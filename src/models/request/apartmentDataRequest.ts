@@ -1,7 +1,7 @@
 import {ApartmentData} from "../ApartmentData";
 
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     ApartmentDataRequest:

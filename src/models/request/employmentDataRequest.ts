@@ -1,7 +1,7 @@
 import {EmploymentData} from "../employmentData";
 
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     EmploymentDataRequest:

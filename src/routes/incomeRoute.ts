@@ -2,8 +2,6 @@ import {Router} from "express";
 import {IncomeData} from "../models/incomeData";
 import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
 import {bodyToIncomeDataRequest, filterIncomeData} from "../utils/incomeDataUtils";
-import queryMediator from "../services/QueryMediator";
-import {parseCSVFromAPI} from "../utils/csvUtils";
 
 const sszDataUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=af01ed91-04f8-445b-8dfc-04cbf0a27e95&limit=1000000";
 let results: IncomeData[] = [];
@@ -24,17 +22,17 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Haushal
     FILTER(regex(str(?Datum),".*-12-31","i")) # TODO should be removed when fix is done
 } ORDER BY ?Datum_nach_Jahr ?Stadtquartier ?Haushaltstyp`;
 
-queryMediator.executeSparqlQuery(query).then(async result => {
-    if (result) {
-        results = await parseCSVFromAPI<IncomeData>(result);
-    }
-}).catch((error) => {
-    console.error(error);
-})
+// queryMediator.executeSparqlQuery(query).then(async result => {
+//     if (result) {
+//         results = await parseCSVFromAPI<IncomeData>(result);
+//     }
+// }).catch((error) => {
+//     console.error(error);
+// })
 const router = Router();
 
 /**
- * @swagger
+ // * @swagger
  * /income:
  *   post:
  *     summary: Retrieve grouped income data based on filters and grouping parameters

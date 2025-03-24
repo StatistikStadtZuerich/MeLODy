@@ -2,8 +2,6 @@ import {Router} from "express";
 import {EmploymentData} from "../models/employmentData";
 import {bodyToEmploymentData, filterEmploymentData} from "../utils/employmentDataUtils";
 import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
-import queryMediator from "../services/QueryMediator";
-import {parseCSVFromAPI} from "../utils/csvUtils";
 
 const dataUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=663a5181-c918-4af3-94e8-efb44bad3678&limit=1000"
 let data: EmploymentData[] = []
@@ -23,17 +21,17 @@ const query = `SELECT ?Datum_nach_Quartal ?Beschaeftigungsgrad ?Anzahl_Beschaeft
 } 
 ORDER BY ?Datum_nach_Quartal ?Beschaeftigungsgrad`
 
-queryMediator.executeSparqlQuery(query).then(async result => {
-    if (result) {
-        data = await parseCSVFromAPI<EmploymentData>(result);
-    }
-}).catch((error) => {
-    console.error(error);
-})
+// queryMediator.executeSparqlQuery(query).then(async result => {
+//     if (result) {
+//         data = await parseCSVFromAPI<EmploymentData>(result);
+//     }
+// }).catch((error) => {
+//     console.error(error);
+// })
 const router = Router()
 
 /**
- * @swagger
+ // * @swagger
  * /employment:
  *   post:
  *     summary: Filter and group employment data

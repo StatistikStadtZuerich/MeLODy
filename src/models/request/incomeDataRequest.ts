@@ -1,7 +1,7 @@
 import {IncomeData} from "../incomeData";
 
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     IncomeDataRequest:

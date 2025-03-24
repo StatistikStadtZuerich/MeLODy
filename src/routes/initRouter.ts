@@ -1,15 +1,9 @@
 import {Router} from "express";
 import path from "node:path";
-import incomeRoute from "./incomeRoute";
-import demographicRoute from "./demographicRoute";
-import mietpreisRoute from "./mietpreisRoute";
-import apartmentRoute from "./apartmentRoute";
-import employmentRoute from "./employmentRoute";
-import populationRoutes from "./populationRoutes";
 import dynamicRoutes from "./dynamicRoutes";
 
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     DataResponse:
@@ -55,12 +49,12 @@ router.get('/privacy-policy', (req, res) => {
     });
 });
 
-router.use("/population", populationRoutes);
-router.use("/income", incomeRoute);
-router.use("/demographics", demographicRoute);
-router.use("/mietpreise", mietpreisRoute);
-router.use("/apartments", apartmentRoute);
-router.use("/employment", employmentRoute);
+// router.use("/population", populationRoutes);
+// router.use("/income", incomeRoute);
+// router.use("/demographics", demographicRoute);
+// router.use("/mietpreise", mietpreisRoute);
+// router.use("/apartments", apartmentRoute);
+// router.use("/employment", employmentRoute);
 router.use("/sparql", dynamicRoutes)
 
 export default router;

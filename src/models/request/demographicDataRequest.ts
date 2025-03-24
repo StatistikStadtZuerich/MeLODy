@@ -1,7 +1,7 @@
 import {DemographicData} from "../demographicData";
 
 /**
- * @swagger
+ // * @swagger
  * components:
  *   schemas:
  *     DemographicDataRequestQueryFilter:

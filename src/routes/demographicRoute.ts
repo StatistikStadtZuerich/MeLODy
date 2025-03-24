@@ -2,8 +2,6 @@ import {Request, Response, Router} from 'express';
 import {DemographicData} from '../models/demographicData';
 import {bodyToDemographicDataRequest, demographicDataFiltered} from "../utils/demographicDataUtils";
 import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
-import queryMediator from "../services/QueryMediator";
-import {parseCSVFromAPI} from "../utils/csvUtils";
 
 const sszDataUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=b2abdef7-3e3f-4883-8033-6787a1561987&limit=1000000";
 let data: DemographicData[] = [];
@@ -33,17 +31,17 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Alter ?
     FILTER(regex(str(?Datum),".*-12-31","i")) # TODO should be removed when fix is done
 } ORDER BY ?Datum_nach_Jahr ?Stadtquartier ?Alter ?Heimatland ?Geschlecht`;
 
-queryMediator.executeSparqlQuery(query).then(async result => {
-    if (result) {
-        data = await parseCSVFromAPI<DemographicData>(result);
-    }
-}).catch((error) => {
-    console.error(error);
-})
+// queryMediator.executeSparqlQuery(query).then(async result => {
+//     if (result) {
+//         data = await parseCSVFromAPI<DemographicData>(result);
+//     }
+// }).catch((error) => {
+//     console.error(error);
+// })
 const router = Router();
 
 /**
- * @swagger
+ // * @swagger
  * /demographics:
  *   post:
  *     summary: Retrieve demographic data for gender, nationality, quarter, age and more.

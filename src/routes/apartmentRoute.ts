@@ -2,8 +2,6 @@ import {Router} from "express";
 import {ApartmentData} from "../models/ApartmentData";
 import {bodyToApartmentDataRequest, filterApartmentData} from "../utils/apartmentDataUtils";
 import {groupDataByQueryParamsCombined} from "../utils/dataUtils";
-import queryMediator from "../services/QueryMediator";
-import {parseCSVFromAPI} from "../utils/csvUtils";
 
 const sszUrl = "https://data.stadt-zuerich.ch/api/3/action/datastore_search?resource_id=493d9be8-6511-4555-b09a-08d07741d5bd&limit=100000"
 let data: ApartmentData[] = []
@@ -29,17 +27,17 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Zimmerz
     FILTER(regex(str(?Datum),".*-12-31","i")) # TODO should be removed when fix is done
 } ORDER BY ?Stadtquartier ?Zimmerzahl ?Eigentumsart ?Bauperiode ?Miete_oder_Eigentum`;
 
-queryMediator.executeSparqlQuery(query).then(async result => {
-    if (result) {
-        data = await parseCSVFromAPI<ApartmentData>(result);
-    }
-}).catch((error) => {
-    console.error(error);
-})
+// queryMediator.executeSparqlQuery(query).then(async result => {
+//     if (result) {
+//         data = await parseCSVFromAPI<ApartmentData>(result);
+//     }
+// }).catch((error) => {
+//     console.error(error);
+// })
 const router = Router();
 
 /**
- * @swagger
+ // * @swagger
  * /apartments:
  *   post:
  *     summary: Filter and group apartment data

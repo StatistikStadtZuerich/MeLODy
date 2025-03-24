@@ -9,13 +9,61 @@ import {parseCSVFromAPI} from "../utils/csvUtils";
  *     DatasetDefinition:
  *       type: object
  *       description: |
- *         Dataset definition containing metadata and query structure information.
- *         - id: Unique identifier for this dataset
- *         - name: Human-readable name
- *         - description: Description of what the dataset contains
- *         - datasetUri: The main URI for the dataset (used in WHERE clause)
- *         - variables: Array of variables to select with name, description, and type (string|number|date)
- *         - predicates: Array of graph paths with path, optional fixedValue, optional variableName, and description
+ *         Dataset definition containing metadata and sparql query structure information.
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: Unique identifier for this dataset
+ *         name:
+ *           type: string
+ *           description: Human-readable name
+ *         description:
+ *           type: string
+ *           description: Description of what the dataset contains
+ *         datasetUri:
+ *           type: string
+ *           description: The main URI for the dataset (used in WHERE clause)
+ *         variables:
+ *           type: array
+ *           description: Variables to select and their descriptions
+ *           items:
+ *             type: object
+ *             required:
+ *               - name
+ *               - description
+ *               - type
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Variable name without ? (e.g., "Wirtschaftliche_Wohnbevoelkerung")
+ *               description:
+ *                 type: string
+ *                 description: Human-readable description
+ *               type:
+ *                 type: string
+ *                 enum: [string, number, date]
+ *                 description: Data type of this variable
+ *         predicates:
+ *           type: array
+ *           description: Predicates (paths in the graph) needed for this query
+ *           items:
+ *             type: object
+ *             required:
+ *               - path
+ *               - description
+ *             properties:
+ *               path:
+ *                 type: string
+ *                 description: The property path (e.g., "sszP:ZEIT/schema:inDefinedTermSet")
+ *               fixedValue:
+ *                 type: string
+ *                 description: Fixed value if not a variable (e.g., "sszTS:Jahr")
+ *               variableName:
+ *                 type: string
+ *                 description: Variable name if not fixed (without ?)
+ *               description:
+ *                 type: string
+ *                 description: Description of what this predicate represents
  *       required:
  *         - id
  *         - name
@@ -61,6 +109,7 @@ export interface DatasetDefinition {
         description: string;
     }[];
 }
+
 
 export type DatasetDefinitions = DatasetDefinition[];
 
@@ -111,10 +160,10 @@ const router = Router();
 
 /**
  * @swagger
- * /api/datasets/definitions:
+ * /sparql/definitions:
  *   get:
- *     summary: Get all dataset definitions
- *     tags: [Datasets]
+ *     summary: Get all dataset definitions to form a valid sparql query
+ *     operationId: datasetDefinitionGetter
  *     responses:
  *       200:
  *         description: List of all dataset definitions
@@ -132,10 +181,10 @@ router.get('/definitions', async (req, res) => {
 
 /**
  * @swagger
- * /api/datasets:
+ * /sparql:
  *   post:
- *     summary: Execute a SPARQL query
- *     tags: [Datasets]
+ *     summary: Execute a SPARQL query with the given DatasetDefinition.
+ *     operationId: sparqlExecution
  *     requestBody:
  *       required: true
  *       content:
