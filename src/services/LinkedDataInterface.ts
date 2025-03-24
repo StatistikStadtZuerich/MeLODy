@@ -23,8 +23,8 @@ export class LinkedDataInterface {
 
     constructor(options: LinkedDataInterfaceOptions = {}) {
         this.configPath = options.configPath || path.join(__dirname, 'config', 'sources.json');
-        this.defaultTimeout = options.timeout || 30000; // 30 seconds
-        this.maxRetries = options.maxRetries || 3;
+        this.defaultTimeout = options.timeout || 300000; // 30 seconds
+        this.maxRetries = options.maxRetries || 10;
         this.retryDelay = options.retryDelay || 1000; // 1 second
         this.sourceConfigs = {};
         this.sourceConfigsLoaded = false;
@@ -55,7 +55,7 @@ export class LinkedDataInterface {
                     const defaultConfigs: SourceConfigs = {
                         'ssz': {
                             type: 'sparql',
-                            endpoint: 'https://ld.integ.stzh.ch/query',
+                            endpoint: 'https://ld.test.stzh.ch/query',
                             format: 'csv',
                             timeout: 45000
                         }

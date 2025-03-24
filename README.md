@@ -1,16 +1,31 @@
 # MeLODy
 
-## Überblick
+Das Projekt MeLODy ist ein Proof of Concept und veranschaulicht, wie man strukturierte statistische Daten in einen Chatbot integriert. 
+Der Bot übersetzt dabei Benutzeranfragen in API-Anfragen, welche daraufhin die Daten verarbeiten und zurücksenden.
+Der Demonstrator beruht auf ChatGPT-Plus und verwendet die Möglichkeit, diesen mit Webservices zu verbinden.
 
-**Projektname:** MeLODy
+[Link zum Bot](https://chatgpt.com/g/g-673daf7008ac819180b306f2e2c3f802-melody)
 
-Das Projekt MeLODy ist darauf ausgelegt, einen LLM Bot wie ChatGPT mit einer API zu verbinden. Der Bot
-übersetzt Benutzeranfragen in API-Anfragen, welche daraufhin die Daten verarbeiten und zurücksenden. ChatGPT analysiert
-die Antwort, übersetzt sie in verständliche Worte und kann damit weiterarbeiten.
+Video 1: Einfache Anfrage|Video 2: Konversation
+--|--
+[<img alt="Einfacher Demochat" width="360px" src="images%2Fmel0.preview.png" />](https://www.youtube.com/watch?v=EDwDnLiYRKU)|[<img alt="Demo-Konversation" width="360px" src="images%2Fmel1.preview.png" />](https://www.youtube.com/watch?v=Dc4dBXWYcfM)
 
-[Link to ChatGPT Bot](https://chatgpt.com/g/g-673daf7008ac819180b306f2e2c3f802-melody)
+## Beispielanfragen
 
-## Optimierung für ChatGPT
+Der Bot (PoC) kann derzeit nur eine kleine Untermenge der vom Statitischen Amt der Stadt Zürich bereitgestellten Daten nutzen.
+Hier sind einige Beispielanfragen:
+
+1. **Wie hat sich die Bevölkerung von Zürich in den letzten 100 Jahren entwickelt? Zeige mir einen Graphen davon.**
+2. **Zeige mir die Geschlechterverteilung über die Jahre.**
+3. **Zeige den Unterschied zwischen Einheimischen und Ausländern zwischen den Geschlechtern über die Jahre.**
+4. **Zeige mir die Altersverteilung von diesem Jahr.**
+5. **Wie hat sich die Anzahl an Kindern über die letzten 30 Jahren verändert?**
+6. **Zeige mir einen Graphen wie sich die Anzahl an Wohnungen über die letzten Jahre verändert haben.**
+7. **Wie hat sich das Einkommen über die letzten Jahre entwickelt?**
+8. **Wie haben sich die Mieten in Quartier XY entwickelt?**
+9. **Wie hat sich die Anzahl der Beschäftigten über die letzten Jahre verändert?**
+
+## Lessons Learned: Optimierung für ChatGPT
 
 Damit ChatGPT effektiv arbeiten kann, sind klare und präzise Endpunkte und Parameter erforderlich. Hier sind einige
 Erfahrungen und Best Practices, um die Zusammenarbeit mit ChatGPT zu optimieren:
@@ -30,20 +45,6 @@ Erfahrungen und Best Practices, um die Zusammenarbeit mit ChatGPT zu optimieren:
 - **Daten Kompaktheit:** ChatGPT kann keine riesigen Datensätze analysieren. Die maximale Anzahl an JSON-Objekten sind ~
   1000 Zeilen. Auch Listen und Zahlen sollten sich begrenzt halten. ChatGPT neigt dazu, die letzten paar Werte zu nehmen
   und für die Antwort anzupassen, wie es will. Präzise Zahlen werden benötigt.
-
-## Beispielanfragen
-
-Hier sind einige Beispielanfragen, die gut funktionieren:
-
-1. **Wie hat sich die Bevölkerung von Zürich in den letzten 100 Jahren entwickelt? Zeige mir einen Graphen davon.**
-2. **Zeige mir die Geschlechterverteilung über die Jahre.**
-3. **Zeige den Unterschied zwischen Einheimischen und Ausländern zwischen den Geschlechtern über die Jahre.**
-4. **Zeige mir die Altersverteilung von diesem Jahr.**
-5. **Wie hat sich die Anzahl an Kindern über die letzten 30 Jahren verändert?**
-6. **Zeige mir einen Graphen wie sich die Anzahl an Wohnungen über die letzten Jahre verändert haben.**
-7. **Wie hat sich das Einkommen über die letzten Jahre entwickelt?**
-8. **Wie haben sich die Mieten in Quartier XY entwickelt?**
-9. **Wie hat sich die Anzahl der Beschäftigten über die letzten Jahre verändert?**
 
 ## Wie die Datenerfassung funktioniert
 

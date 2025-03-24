@@ -1,14 +1,15 @@
 version: '3.8'
 
 services:
-  ssz-statistics-bot:
-    container_name: ssz-statistics-bot-server
+  melody-1.1:
+    container_name: melody-1.1-server
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3002:3002"
+      - "3003:3003"
     environment:
-      - PORT=3002
+      - PORT=3003
       - BASE_URI=http://localhost
       - BASE_PATH=/api/v1
+      - PUBLIC_URI=https://melody-1-1-server.ssz.redlink.io
