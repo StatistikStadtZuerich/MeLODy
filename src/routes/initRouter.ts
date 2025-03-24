@@ -6,6 +6,7 @@ import mietpreisRoute from "./mietpreisRoute";
 import apartmentRoute from "./apartmentRoute";
 import employmentRoute from "./employmentRoute";
 import populationRoutes from "./populationRoutes";
+import dynamicRoutes from "./dynamicRoutes";
 
 /**
  * @swagger
@@ -33,6 +34,14 @@ import populationRoutes from "./populationRoutes";
  *           description: The source of the data
  */
 
+export interface DataResponse {
+    result: Record<string, unknown>;
+    keys: string[];
+    total: number;
+    source: string;
+}
+
+
 const router = Router();
 
 router.get('/swagger.yaml', (req, res) => {
@@ -52,5 +61,6 @@ router.use("/demographics", demographicRoute);
 router.use("/mietpreise", mietpreisRoute);
 router.use("/apartments", apartmentRoute);
 router.use("/employment", employmentRoute);
+router.use("/sparql", dynamicRoutes)
 
 export default router;
