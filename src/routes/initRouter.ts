@@ -41,8 +41,7 @@ router.get('/swagger.yaml', (req, res) => {
 
 router.get('/privacy-policy', (req, res) => {
     res.json({
-        policy: "Our privacy pol" +
-            "icy is simple: we do not share your information with third parties without your consent. However, please note that this application uses OpenAI's services, such as ChatGPT, which may collect and use some data. For more details, refer to OpenAI's privacy policy at https://openai.com/privacy/"
+        policy: "We do not share any information with third parties. Usage data is only used for monitoring issues. No personal data is stored."
     });
 });
 
