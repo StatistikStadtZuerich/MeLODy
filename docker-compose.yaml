@@ -1,8 +1,8 @@
 version: '3.8'
 
 services:
-  ssz-statistics-bot:
-    container_name: ssz-statistics-bot-server
+  melody-1.1:
+    container_name: melody-1.1-server
     build:
       context: .
       dockerfile: Dockerfile
