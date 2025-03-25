@@ -54,6 +54,6 @@ router.get('/privacy-policy', (req, res) => {
 // router.use("/mietpreise", mietpreisRoute);
 // router.use("/apartments", apartmentRoute);
 // router.use("/employment", employmentRoute);
-router.use("/sparql", dynamicRoutes)
+router.use("", dynamicRoutes)
 
 export default router;

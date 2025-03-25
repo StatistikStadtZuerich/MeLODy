@@ -1,222 +1,146 @@
 import {Router} from "express";
+import queryProcessor from "../services/sqlite/queryProcessor";
+import {DataQuery} from "../models/DatasetDefinition";
+import {initializeDatasets, storeDataset} from "../services/sqlite/datasetInitializer";
 import queryMediator from "../services/QueryMediator";
 import {parseCSVFromAPI} from "../utils/csvUtils";
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     DatasetDefinition:
- *       type: object
- *       description: |
- *         Dataset definition containing metadata and sparql query structure information.
- *       properties:
- *         id:
- *           type: string
- *           description: Unique identifier for this dataset
- *         name:
- *           type: string
- *           description: Human-readable name
- *         description:
- *           type: string
- *           description: Description of what the dataset contains
- *         datasetUri:
- *           type: string
- *           description: The main URI for the dataset (used in WHERE clause)
- *         variables:
- *           type: array
- *           description: Variables to select and their descriptions
- *           items:
- *             type: object
- *             required:
- *               - name
- *               - description
- *               - type
- *             properties:
- *               name:
- *                 type: string
- *                 description: Variable name without ? (e.g., "Wirtschaftliche_Wohnbevoelkerung")
- *               description:
- *                 type: string
- *                 description: Human-readable description
- *               type:
- *                 type: string
- *                 enum: [string, number, date]
- *                 description: Data type of this variable
- *         predicates:
- *           type: array
- *           description: Predicates (paths in the graph) needed for this query
- *           items:
- *             type: object
- *             required:
- *               - path
- *               - description
- *             properties:
- *               path:
- *                 type: string
- *                 description: The property path (e.g., "sszP:ZEIT/schema:inDefinedTermSet")
- *               fixedValue:
- *                 type: string
- *                 description: Fixed value if not a variable (e.g., "sszTS:Jahr")
- *               variableName:
- *                 type: string
- *                 description: Variable name if not fixed (without ?)
- *               description:
- *                 type: string
- *                 description: Description of what this predicate represents
- *       required:
- *         - id
- *         - name
- *         - description
- *         - datasetUri
- *         - variables
- *         - predicates
- *       example:
- *         id: population
- *         name: Population Data
- *         description: Economic residential population of Zurich by year
- *         datasetUri: https://ld.stadt-zuerich.ch/statistics/000201/observation
- *         variables:
- *           - name: Datum
- *             description: Date/time of the observation
- *             type: date
- *           - name: Wirtschaftliche_Wohnbevoelkerung
- *             description: Economic residential population count
- *             type: number
- *         predicates:
- *           - path: sszP:ZEIT/schema:inDefinedTermSet
- *             fixedValue: sszTS:Jahr
- *             description: Specifies that time is measured in years
- */
-
-export interface DatasetDefinition {
-    id: string;
-    name: string;
-    description: string;
-
-    datasetUri: string;
-
-    variables: {
-        name: string;
-        description: string;
-        type: 'string' | 'number' | 'date';
-    }[];
-
-    predicates: {
-        path: string;
-        fixedValue?: string;
-        variableName?: string;
-        description: string;
-    }[];
-}
+import {allDatasets} from "../models/datasetDefinitions/allDatasets";
 
 
-export type DatasetDefinitions = DatasetDefinition[];
-
-const populationDatasetDefinition: DatasetDefinition = {
-    id: 'population',
-    name: 'Population Data',
-    description: 'Economic residential population of Zurich by year',
-    datasetUri: 'https://ld.stadt-zuerich.ch/statistics/000201/observation',
-    variables: [
-        {
-            name: 'Datum',
-            description: 'Date/time of the observation (typically processed to extract year)',
-            type: 'date'
-        },
-        {
-            name: 'Wirtschaftliche_Wohnbevoelkerung',
-            description: 'Economic residential population count',
-            type: 'number'
+initializeDatasets(allDatasets.map(item => item.definition)).then(initiatedDataSets => {
+    for (const dataset of initiatedDataSets) {
+        const query = allDatasets.find(item => item.definition.id === dataset)?.sparqlQuery
+        if (!query) {
+            console.error(`No SPARQL query found for dataset ${dataset}`)
+            return;
         }
-    ],
-    predicates: [
-        {
-            path: 'sszP:ZEIT/schema:inDefinedTermSet',
-            fixedValue: 'sszTS:Jahr',
-            description: 'Specifies that time is measured in years'
-        },
-        {
-            path: 'sszP:TIME',
-            variableName: 'Datum',
-            description: 'The actual date value'
-        },
-        {
-            path: 'sszM:BEW',
-            variableName: 'Wirtschaftliche_Wohnbevoelkerung',
-            description: 'The population count measurement'
-        },
-        {
-            path: 'sszP:RAUM',
-            fixedValue: '<https://ld.stadt-zuerich.ch/statistics/code/R30000>',
-            description: 'Specifies the geographic area (Zurich)'
-        }
-    ]
-};
+        queryMediator.executeSparqlQuery(query).then(async result => {
+            if (result) {
+                storeDataset(dataset, await parseCSVFromAPI<unknown>(result)).then(success => {
+                    console.log(`Stored ${dataset} dataset ${success}`)
+                })
+            } else {
+                console.error(`No result found for dataset ${dataset}`)
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
+});
 
-const datasetDefinitions: DatasetDefinitions = [populationDatasetDefinition];
 
 const router = Router();
 
+
 /**
  * @swagger
- * /sparql/definitions:
+ * /datasets:
  *   get:
- *     summary: Get all dataset definitions to form a valid sparql query
- *     operationId: datasetDefinitionGetter
+ *     operationId: datasetReceiver
+ *     summary: Retrieve all available datasets
+ *     description: Returns a list of all datasets available in the system
+ *     tags:
+ *       - Datasets
  *     responses:
  *       200:
- *         description: List of all dataset definitions
+ *         description: List of datasets successfully retrieved
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/DatasetDefinition'
+ *               type: object
+ *               properties:
+ *                 datasets:
+ *                   $ref: '#/components/schemas/DatasetDefinitions'
+ *       500:
+ *         description: Server error while fetching datasets
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
  */
-
-router.get('/definitions', async (req, res) => {
-    res.status(200).json(datasetDefinitions);
+router.get('/datasets', async (req, res) => {
+    try {
+        const datasets = await queryProcessor.getDatasets();
+        res.status(200).json({datasets});
+    } catch (error) {
+        console.error('Error fetching datasets:', error);
+        res.status(500).json({error: 'Failed to fetch datasets'});
+    }
 });
 
 /**
  * @swagger
- * /sparql:
+ * /query:
  *   post:
- *     summary: Execute a SPARQL query with the given DatasetDefinition.
- *     operationId: sparqlExecution
+ *     operationId: dataQuery
+ *     summary: Query dataset data
+ *     description: Executes a query against a specified dataset with optional filters and sorting
+ *     tags:
+ *       - Queries
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required: [query]
- *             properties:
- *               query:
- *                 type: string
- *                 description: SPARQL query to execute
+ *             $ref: '#/components/schemas/DataQuery'
  *     responses:
  *       200:
- *         description: Parsed query results
+ *         description: Query executed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 count:
+ *                   type: integer
+ *                 dataset:
+ *                   type: string
  *       400:
- *         description: Missing query or no results found
+ *         description: Invalid request parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Server error while executing query
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
  */
-router.post('/', async (req, res) => {
-    const {query} = req.body || {};
-    if (!query) {
-        res.status(400).json({error: 'No query provided'});
-        return;
-    }
+router.post('/query', async (req, res) => {
+    try {
+        const query = req.body as DataQuery;
 
-    const result = await queryMediator.executeSparqlQuery(query);
-    if (!result) {
-        res.status(400).json({error: 'No data found for the specified query'});
-        return;
-    }
-    const data = await parseCSVFromAPI(result);
-    res.status(200).json(data);
-})
+        if (!query.datasetId) {
+            res.status(400).json({error: 'datasetId is required'});
+            return;
+        }
 
+        const results = await queryProcessor.query(query);
+
+        res.status(200).json({
+            results,
+            count: results.length,
+            dataset: query.datasetId
+        });
+    } catch (error: any) {
+        console.error('Error executing query:', error);
+        res.status(500).json({error: error.message});
+    }
+});
 
 export default router;
