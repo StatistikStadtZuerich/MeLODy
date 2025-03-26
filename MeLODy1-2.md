@@ -7,6 +7,8 @@ Version 1.1 brought a significant change by replacing the original Stadt-Zürich
 linked data repository. This was a step forward in building a more dynamic system, as it eliminated reliance on
 predefined data and allowed for flexible grouping and data view generation.
 
+To test the model, it is available on [ChatGPT](https://chatgpt.com/g/g-67da7d40adb08191a37c61a815f7f9bd-melody-1-1).
+
 However, we discovered that, since November/December, ChatGPT models have struggled even more with adhering to enum
 specifications in API Specs. Specifically, many `groupBy` enum values are often overlooked, even when explicitly
 instructed on which fields to use. To overcome this, we implemented filter maps to standardize values used by ChatGPT
