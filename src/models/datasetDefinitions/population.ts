@@ -1,25 +1,5 @@
-import {DatasetDefinition, DatasetDefinitionWithSparqlQuery} from "../DatasetDefinition";
+import {DatasetIdWithQuery} from "../DatasetIdWithQuery";
 
-const populationDatasetDefinition: DatasetDefinition = {
-    id: 'population',
-    title: 'Population Data',
-    description: 'Economic residential population of Zurich by year',
-    fields: [
-        {
-            name: 'Datum',
-            description: 'Year of observation',
-            type: 'number'
-        },
-        {
-            name: 'Wirtschaftliche_Wohnbevoelkerung',
-            description: 'Economic residential population count',
-            type: 'number'
-        }
-    ],
-    filters: [
-        {field: 'year', type: 'range'}
-    ]
-};
 const query = `SELECT (year(?Datum) AS ?Jahr) ?Wirtschaftliche_Wohnbevoelkerung WHERE {
   <https://ld.stadt-zuerich.ch/statistics/000201/observation> cube:observation [
         sszP:ZEIT/schema:inDefinedTermSet sszTS:Jahr;
@@ -30,7 +10,7 @@ const query = `SELECT (year(?Datum) AS ?Jahr) ?Wirtschaftliche_Wohnbevoelkerung 
 } 
 ORDER BY ?Jahr`;
 
-export const populationDatasetDefinitionWithQuery: DatasetDefinitionWithSparqlQuery = {
-    definition: populationDatasetDefinition,
+export const populationDatasetDefinitionWithQuery: DatasetIdWithQuery = {
+    id: 'population',
     sparqlQuery: query
 };

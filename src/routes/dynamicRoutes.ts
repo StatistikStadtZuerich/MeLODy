@@ -1,73 +1,54 @@
 import {Router} from "express";
-import queryProcessor from "../services/sqlite/queryProcessor";
-import {DataQuery} from "../models/DatasetDefinition";
-import {initializeDatasets, storeDataset} from "../services/sqlite/datasetInitializer";
 import queryMediator from "../services/QueryMediator";
-import {parseCSVFromAPI} from "../utils/csvUtils";
 import {allDatasets} from "../models/datasetDefinitions/allDatasets";
+import {storeCSVInSQLite} from "../utils/csvSqliteUtils";
+import {executeSQLiteQuery, getPrettyDatabaseSchema} from "../utils/sqliteUtils";
+import {compressJsonWithIdMapping} from "../utils/dataUtils";
+import {readFileWithTypeCheck} from "../utils/csvUtils";
 
-
-initializeDatasets(allDatasets.map(item => item.definition)).then(initiatedDataSets => {
-    for (const dataset of initiatedDataSets) {
-        const query = allDatasets.find(item => item.definition.id === dataset)?.sparqlQuery
-        if (!query) {
-            console.error(`No SPARQL query found for dataset ${dataset}`)
-            return;
-        }
-        queryMediator.executeSparqlQuery(query).then(async result => {
-            if (result) {
-                storeDataset(dataset, await parseCSVFromAPI<unknown>(result)).then(success => {
-                    console.log(`Stored ${dataset} dataset ${success}`)
-                })
-            } else {
-                console.error(`No result found for dataset ${dataset}`)
-            }
-        }).catch((error) => {
-            console.error(error);
-        });
+allDatasets.forEach(dataset => {
+    console.log(`Executing query for dataset ${dataset.id}`);
+    let dataPromise: Promise<any> | undefined;
+    if (dataset.sparqlQuery) {
+        dataPromise = queryMediator.executeSparqlQuery(dataset.sparqlQuery)
+    } else if (dataset.file) {
+        dataPromise = readFileWithTypeCheck(dataset.file)
     }
+    dataPromise?.then(async result => {
+        if (result) {
+            try {
+                const storedItems = await storeCSVInSQLite(result, dataset.id, undefined, true);
+                console.log(`Stored ${storedItems} items for dataset ${dataset.id}`);
+            } catch (error) {
+                console.error(`Error storing dataset ${dataset.id}: ${error}`);
+            }
+        } else {
+            console.error(`No result found for dataset ${dataset.id}`)
+        }
+    });
 });
 
 
 const router = Router();
 
-
 /**
  * @swagger
- * /datasets:
+ * /schemas:
  *   get:
- *     operationId: datasetReceiver
- *     summary: Retrieve all available datasets
- *     description: Returns a list of all datasets available in the system
- *     tags:
- *       - Datasets
+ *     summary: Retrieve all available schemas
+ *     description: Returns a list of all schema information
+ *     operationId: getSchemas
  *     responses:
  *       200:
- *         description: List of datasets successfully retrieved
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 datasets:
- *                   $ref: '#/components/schemas/DatasetDefinitions'
- *       500:
- *         description: Server error while fetching datasets
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
+ *         description: Successfully retrieved schemas
  */
-router.get('/datasets', async (req, res) => {
+router.get('/schemas', async (req, res) => {
     try {
-        const datasets = await queryProcessor.getDatasets();
-        res.status(200).json({datasets});
+        const schemas = getPrettyDatabaseSchema()
+        res.status(200).json(schemas);
     } catch (error) {
-        console.error('Error fetching datasets:', error);
-        res.status(500).json({error: 'Failed to fetch datasets'});
+        console.error('Error fetching schemas:', error);
+        res.status(500).json({error: 'Failed to fetch schemas'});
     }
 });
 
@@ -75,71 +56,41 @@ router.get('/datasets', async (req, res) => {
  * @swagger
  * /query:
  *   post:
- *     operationId: dataQuery
- *     summary: Query dataset data
- *     description: Executes a query against a specified dataset with optional filters and sorting
- *     tags:
- *       - Queries
+ *     summary: Execute a SQLite query against the schemas
+ *     description: Run a custom SQL query on the SQLite database and return results
+ *     operationId: executeQuery
  *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/DataQuery'
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required: [query]
+ *              properties:
+ *                query:
+ *                  type: string
+ *                  example: "SELECT * FROM dataset_name LIMIT 10"
  *     responses:
  *       200:
- *         description: Query executed successfully
+ *         description: A compressed data structure containing both the query results and an ID-to-name mapping dictionary. The compression reduces payload size by replacing repeated string values with numeric IDs.
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 results:
- *                   type: array
- *                   items:
- *                     type: object
- *                 count:
- *                   type: integer
- *                 dataset:
- *                   type: string
- *       400:
- *         description: Invalid request parameters
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *       500:
- *         description: Server error while executing query
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
+ *               type: string
  */
 router.post('/query', async (req, res) => {
     try {
-        const query = req.body as DataQuery;
-
-        if (!query.datasetId) {
-            res.status(400).json({error: 'datasetId is required'});
+        const {query} = req.body || {};
+        if (!query) {
+            res.status(400).json({error: 'query is required'});
             return;
         }
-
-        const results = await queryProcessor.query(query);
-
-        res.status(200).json({
-            results,
-            count: results.length,
-            dataset: query.datasetId
-        });
-    } catch (error: any) {
+        const results = executeSQLiteQuery(query);
+        const compressedResults = compressJsonWithIdMapping(results)
+        res.status(200).json(JSON.stringify(compressedResults));
+    } catch (error) {
         console.error('Error executing query:', error);
-        res.status(500).json({error: error.message});
+        res.status(500).json({error: error});
     }
 });
 

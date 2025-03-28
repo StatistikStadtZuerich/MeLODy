@@ -46,9 +46,3 @@ export interface SparqlResults {
 
 
 export type FormatType = 'json' | 'table' | 'text' | 'csv';
-
-export interface SuccessResponse {
-    success: boolean;
-    message: string;
-}
-

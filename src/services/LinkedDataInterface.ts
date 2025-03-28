@@ -1,4 +1,3 @@
-// linkedDataInterface.ts
 import axios, {AxiosError, AxiosRequestConfig} from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
