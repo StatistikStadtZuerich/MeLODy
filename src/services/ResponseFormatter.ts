@@ -1,5 +1,3 @@
-// responseFormatter.ts
-
 import {FormatType, ResponseFormatterOptions, SparqlBinding, SparqlResults, TableResponse} from "../models/models";
 import {FormatterError} from "../models/errorModels";
 
