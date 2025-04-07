@@ -1,3 +1,6 @@
+import {DatasetIdWithQuery} from "../models/DatasetIdWithQuery";
+import {allDatasets} from "../models/datasetDefinitions/allDatasets";
+
 export const compressJsonWithIdMapping = (jsonData: Record<string, any>[]): {
     idPerName: Record<string, number>,
     data: Record<number, any>[]
@@ -25,4 +28,20 @@ export const compressJsonWithIdMapping = (jsonData: Record<string, any>[]): {
         idPerName,
         data: compressedData
     };
+};
+
+export const extractTablesFromQuery = (query: string): DatasetIdWithQuery[] => {
+    const tablePattern = /(?:FROM|JOIN)\s+([a-zA-Z0-9_]+)/gi;
+    const tableMatches = [...query.matchAll(tablePattern)];
+
+    const tableNames = new Set<string>();
+    for (const match of tableMatches) {
+        if (match[1]) {
+            tableNames.add(match[1].trim());
+        }
+    }
+
+    return allDatasets.filter(dataset =>
+        tableNames.has(dataset.id)
+    );
 };

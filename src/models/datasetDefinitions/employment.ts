@@ -12,5 +12,6 @@ ORDER BY ?Datum_nach_Quartal ?Beschaeftigungsgrad`;
 
 export const employmentData: DatasetIdWithQuery = {
     id: 'employment',
-    sparqlQuery: query
+    sparqlQuery: query,
+    source: "https://ld.integ.stzh.ch/statistics/view/WIR400OD4004"
 };

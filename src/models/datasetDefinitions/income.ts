@@ -14,5 +14,6 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Haushal
 
 export const incomeData: DatasetIdWithQuery = {
     id: 'income',
-    sparqlQuery: query
+    sparqlQuery: query,
+    source: "https://ld.integ.stzh.ch/statistics/view/WIR100OD100A"
 };

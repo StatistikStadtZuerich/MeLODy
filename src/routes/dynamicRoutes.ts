@@ -3,7 +3,7 @@ import queryMediator from "../services/QueryMediator";
 import {allDatasets} from "../models/datasetDefinitions/allDatasets";
 import {storeCSVInSQLite} from "../utils/csvSqliteUtils";
 import {executeSQLiteQuery, getPrettyDatabaseSchema} from "../utils/sqliteUtils";
-import {compressJsonWithIdMapping} from "../utils/dataUtils";
+import {compressJsonWithIdMapping, extractTablesFromQuery} from "../utils/dataUtils";
 import {readFileWithTypeCheck} from "../utils/csvUtils";
 
 allDatasets.forEach(dataset => {
@@ -87,7 +87,9 @@ router.post('/query', async (req, res) => {
         }
         const results = executeSQLiteQuery(query);
         const compressedResults = compressJsonWithIdMapping(results)
-        res.status(200).json(JSON.stringify(compressedResults));
+        const datasets = Array.from(new Set(extractTablesFromQuery(query).map(item => item.source ?? item.file).filter(Boolean))) as string[];
+        const resultsWithDatasets = {...compressedResults, sources: datasets};
+        res.status(200).json(JSON.stringify(resultsWithDatasets));
     } catch (error) {
         console.error('Error executing query:', error);
         res.status(500).json({error: error});

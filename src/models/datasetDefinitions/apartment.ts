@@ -19,5 +19,6 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Zimmerz
 
 export const apartmentData: DatasetIdWithQuery = {
     id: 'apartment',
-    sparqlQuery: query
+    sparqlQuery: query,
+    source: "https://ld.integ.stzh.ch/statistics/view/BAU583OD5831"
 };

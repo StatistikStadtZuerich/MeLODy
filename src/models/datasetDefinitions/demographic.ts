@@ -16,5 +16,6 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Alter ?
 
 export const demographicData: DatasetIdWithQuery = {
     id: 'demographic',
-    sparqlQuery: query
+    sparqlQuery: query,
+    source: "https://ld.integ.stzh.ch/statistics/view/BEV390OD3903"
 };

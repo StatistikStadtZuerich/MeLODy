@@ -12,5 +12,6 @@ ORDER BY ?Jahr`;
 
 export const populationDatasetDefinitionWithQuery: DatasetIdWithQuery = {
     id: 'population',
-    sparqlQuery: query
+    sparqlQuery: query,
+    source: "https://ld.integ.stzh.ch/statistics/view/BEV324OD3243"
 };
