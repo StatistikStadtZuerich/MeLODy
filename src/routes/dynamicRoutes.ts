@@ -87,7 +87,9 @@ router.post('/query', async (req, res) => {
         }
         const results = executeSQLiteQuery(query);
         const compressedResults = compressJsonWithIdMapping(results)
-        const datasets = Array.from(new Set(extractTablesFromQuery(query).map(item => item.source ?? item.file).filter(Boolean))) as string[];
+        const datasets = Array.from(new Set(extractTablesFromQuery(query).map(item => (item.source ? item.source : item.file?.split('/').pop()?.replace(/\.zip$/i, '')
+            )
+        ).filter(Boolean))) as string[];
         const resultsWithDatasets = {...compressedResults, sources: datasets};
         res.status(200).json(JSON.stringify(resultsWithDatasets));
     } catch (error) {
