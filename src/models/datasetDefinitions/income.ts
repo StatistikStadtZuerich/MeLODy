@@ -1,4 +1,5 @@
 import {DatasetIdWithQuery} from "../DatasetIdWithQuery";
+import {DATA_SOURCE_BASE_URL} from "../../server";
 
 const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Haushaltstyp ?Haushaltsäquivalenzeinkommen_Median_in_1000_CHF WHERE {
     <https://ld.stadt-zuerich.ch/statistics/000608/observation> cube:observation [
@@ -15,5 +16,5 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Haushal
 export const incomeData: DatasetIdWithQuery = {
     id: 'income',
     sparqlQuery: query,
-    source: "https://ld.integ.stzh.ch/statistics/view/WIR100OD100A"
+    source: `${DATA_SOURCE_BASE_URL}WIR100OD100A`
 };

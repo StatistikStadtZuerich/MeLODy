@@ -1,4 +1,5 @@
 import {DatasetIdWithQuery} from "../DatasetIdWithQuery";
+import {DATA_SOURCE_BASE_URL} from "../../server";
 
 const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Alter ?Heimatland ?Geschlecht ?Wirtschaftliche_Wohnbevoelkerung WHERE {
     <https://ld.stadt-zuerich.ch/statistics/000238/observation> cube:observation [
@@ -17,5 +18,5 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Alter ?
 export const demographicData: DatasetIdWithQuery = {
     id: 'demographic',
     sparqlQuery: query,
-    source: "https://ld.integ.stzh.ch/statistics/view/BEV390OD3903"
+    source: `${DATA_SOURCE_BASE_URL}BEV390OD3903`
 };

@@ -45,3 +45,4 @@ export const extractTablesFromQuery = (query: string): DatasetIdWithQuery[] => {
         tableNames.has(dataset.id)
     );
 };
+

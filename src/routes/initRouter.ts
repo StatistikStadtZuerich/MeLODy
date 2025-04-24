@@ -1,12 +1,13 @@
 import {Router} from "express";
 import path from "node:path";
 import dynamicRoutes from "./dynamicRoutes";
+import {DATA_DIR} from "../server";
 
 
 const router = Router();
 
 router.get('/swagger.yaml', (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "..", "swagger.yaml"));
+    res.sendFile(path.join(DATA_DIR, "swagger.yaml"));
 });
 
 router.get('/privacy-policy', (req, res) => {

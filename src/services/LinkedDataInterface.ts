@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import {SourceConfig, SourceConfigs} from "../models/models";
 import {LinkedDataError} from "../models/errorModels";
+import {SPARQL_ENDPOINT} from "../server";
 
 interface LinkedDataInterfaceOptions {
     configPath?: string;
@@ -49,12 +50,15 @@ export class LinkedDataInterface {
             try {
                 const configData = await fs.readFile(this.configPath, 'utf8');
                 this.sourceConfigs = JSON.parse(configData);
+                if (this.sourceConfigs["ssz"]) {
+                    this.sourceConfigs["ssz"].endpoint = SPARQL_ENDPOINT;
+                }
             } catch (error: any) {
                 if (error.code === 'ENOENT') {
                     const defaultConfigs: SourceConfigs = {
                         'ssz': {
                             type: 'sparql',
-                            endpoint: 'https://ld.test.stzh.ch/query',
+                            endpoint: SPARQL_ENDPOINT,
                             format: 'csv',
                             timeout: 45000
                         }

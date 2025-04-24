@@ -3,6 +3,7 @@ import swaggerUi from 'swagger-ui-express';
 import YAML from "yamljs";
 import fs from "fs";
 import path from "node:path";
+import {DATA_DIR} from "../server";
 
 const swaggerOptions = (url: string): Options => ({
     definition: {
@@ -30,7 +31,7 @@ const swaggerDocs = (url: string) => {
 
 const generateSwaggerFile = (swaggerObject: unknown) => {
     const swaggerYaml = YAML.stringify(swaggerObject, 4);
-    fs.writeFileSync(path.join(__dirname, "..", "..", "swagger.yaml"), swaggerYaml, 'utf-8')
+    fs.writeFileSync(path.join(DATA_DIR, "swagger.yaml"), swaggerYaml, 'utf-8')
 }
 
 export const swaggerInit = swaggerUi.serve;

@@ -1,6 +1,10 @@
 import express from "express";
 import initRouter from "./routes/initRouter";
 import {swaggerInit, swaggerUiInit} from "./swagger/initSwagger";
+import path from "node:path";
+import os from "node:os";
+import {randomUUID} from "node:crypto";
+import fs from "fs";
 
 if (process.env.DEBUG_MODE === 'true') {
     require('dotenv').config({path: '.env.local-dev'});
@@ -11,6 +15,24 @@ if (process.env.DEBUG_MODE === 'true') {
 const app = express();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+
+export const DATA_SOURCE_BASE_URL = process.env.DATA_SOURCE_BASE_URL || "https://ld.integ.stzh.ch/statistics/view/";
+export const SPARQL_ENDPOINT = process.env.SPARQL_ENDPOINT || "https://ld.test.stzh.ch/query";
+
+const getDataDir = () => {
+    const dataDir = process.env.DATA_DIR || path.join(os.tmpdir(), 'melody-data-' + randomUUID());
+
+    try {
+        if (!fs.existsSync(dataDir)) {
+            fs.mkdirSync(dataDir);
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    return dataDir;
+}
+
+export const DATA_DIR = getDataDir();
 
 const port = process.env.PORT;
 const baseURI = process.env.BASE_URI;

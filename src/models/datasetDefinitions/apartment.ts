@@ -1,4 +1,5 @@
 import {DatasetIdWithQuery} from "../DatasetIdWithQuery";
+import {DATA_SOURCE_BASE_URL} from "../../server";
 
 
 const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Zimmerzahl ?Eigentumsart ?Bauperiode ?Miete_oder_Eigentum (xsd:integer(?Anzahl_Wohnungen_decimal) AS ?Anzahl_Wohnungen) WHERE {
@@ -20,5 +21,5 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Zimmerz
 export const apartmentData: DatasetIdWithQuery = {
     id: 'apartment',
     sparqlQuery: query,
-    source: "https://ld.integ.stzh.ch/statistics/view/BAU583OD5831"
+    source: `${DATA_SOURCE_BASE_URL}BAU583OD5831`
 };

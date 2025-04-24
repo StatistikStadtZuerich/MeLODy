@@ -1,4 +1,5 @@
 import {DatasetIdWithQuery} from "../DatasetIdWithQuery";
+import {DATA_SOURCE_BASE_URL} from "../../server";
 
 const query = `SELECT (year(?Datum) AS ?Jahr) ?Wirtschaftliche_Wohnbevoelkerung WHERE {
   <https://ld.stadt-zuerich.ch/statistics/000201/observation> cube:observation [
@@ -13,5 +14,5 @@ ORDER BY ?Jahr`;
 export const populationDatasetDefinitionWithQuery: DatasetIdWithQuery = {
     id: 'population',
     sparqlQuery: query,
-    source: "https://ld.integ.stzh.ch/statistics/view/BEV324OD3243"
+    source: `${DATA_SOURCE_BASE_URL}BEV324OD3243`
 };
