@@ -6,6 +6,12 @@ import {executeSQLiteQuery, getPrettyDatabaseSchema} from "../utils/sqliteUtils"
 import {compressJsonWithIdMapping, extractTablesFromQuery} from "../utils/dataUtils";
 import {readFileWithTypeCheck} from "../utils/csvUtils";
 
+const startTime = Date.now();
+
+let datasetsReady = false;
+// Collect all promises
+const allPromises: Promise<void>[] = [];
+
 allDatasets.forEach(dataset => {
     console.log(`Executing query for dataset ${dataset.id}`);
     let dataPromise: Promise<any> | undefined;
@@ -14,19 +20,48 @@ allDatasets.forEach(dataset => {
     } else if (dataset.file) {
         dataPromise = readFileWithTypeCheck(dataset.file)
     }
-    dataPromise?.then(async result => {
-        if (result) {
-            try {
-                const storedItems = await storeCSVInSQLite(result, dataset.id, undefined, true);
-                console.log(`Stored ${storedItems} items for dataset ${dataset.id}`);
-            } catch (error) {
-                console.error(`Error storing dataset ${dataset.id}: ${error}`);
+
+    if (dataPromise) {
+        // Convert each dataset processing into a promise and collect it
+        const processPromise = dataPromise.then(async result => {
+            if (result) {
+                try {
+                    const storedItems = await storeCSVInSQLite(result, dataset.id, undefined, true);
+                    console.log(`Stored ${storedItems} items for dataset ${dataset.id}`);
+                } catch (error) {
+                    console.error(`Error storing dataset ${dataset.id}: ${error}`);
+                }
+            } else {
+                console.error(`No result found for dataset ${dataset.id}`)
             }
-        } else {
-            console.error(`No result found for dataset ${dataset.id}`)
-        }
-    });
+        });
+
+        allPromises.push(processPromise);
+    }
 });
+
+Promise.all(allPromises)
+    .then(() => {
+        datasetsReady = true;
+        const endTime = Date.now();
+        const totalTimeSeconds = ((endTime - startTime) / 1000).toFixed(2);
+        console.log(`All datasets stored successfully in ${totalTimeSeconds} seconds`);
+    })
+    .catch(error => {
+        const endTime = Date.now();
+        const totalTimeSeconds = ((endTime - startTime) / 1000).toFixed(2);
+        console.error(`Error processing datasets after ${totalTimeSeconds} seconds:`, error);
+    });
+
+export const readynessRouter = Router();
+
+readynessRouter.get('/_/ready', (req, res) => {
+    if (datasetsReady) {
+        res.status(200).send();
+    } else {
+        res.status(503).send();
+    }
+})
 
 
 const router = Router();

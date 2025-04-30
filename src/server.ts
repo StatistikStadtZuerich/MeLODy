@@ -5,6 +5,10 @@ import path from "node:path";
 import os from "node:os";
 import {randomUUID} from "node:crypto";
 import fs from "fs";
+import {readynessRouter} from "./routes/dynamicRoutes";
+
+// Record the start time when server.ts begins execution
+const serverStartTime = Date.now();
 
 if (process.env.DEBUG_MODE === 'true') {
     require('dotenv').config({path: '.env.local-dev'});
@@ -56,11 +60,21 @@ router.use("/swagger", swaggerInit, swaggerUiInit(fullPublicPath));
 
 app.use(basePath, router)
 
+app.use("", readynessRouter);
+
 app.get('/', (req, res) => {
     res.send('Express + TypeScript Server. Hello World');
 });
 
+app.get('/_/health/:tag?', (req, res) => {
+    console.info(`[server]: Health check received; Tag = ${req.params.tag}`);
+    res.status(200).send();
+});
+
+
 app.listen(port, () => {
+    const startupTime = Date.now() - serverStartTime;
+    console.log(`[server]: Server started in ${startupTime}ms`);
     console.log(`[server]: Server is running at ${baseDestination}`);
     console.log(`[server]: Swagger UI is running at ${fullPublicPath}/swagger`);
     console.log(`[server]: Swagger YAML is running at ${fullPath}/swagger.yaml`);
