@@ -6,8 +6,17 @@ import os from "node:os";
 import {randomUUID} from "node:crypto";
 import fs from "fs";
 import {readynessRouter} from "./routes/dynamicRoutes";
+import logger, {stream} from "./utils/logger";
+import morgan from "morgan";
 
-// Record the start time when server.ts begins execution
+declare global {
+    namespace Express {
+        interface Request {
+            requestId: string;
+        }
+    }
+}
+
 const serverStartTime = Date.now();
 
 if (process.env.DEBUG_MODE === 'true') {
@@ -20,9 +29,27 @@ const app = express();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
+app.use((req, res, next) => {
+    req.requestId = randomUUID();
+    next();
+});
+
+morgan.token('request-id', (req: any) => req.requestId);
+app.use(morgan('[:request-id] :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', {stream}));
+
+try {
+    if (!fs.existsSync('logs')) {
+        fs.mkdirSync('logs');
+        logger.info('Logs directory created');
+    }
+} catch (err) {
+    logger.error('Error creating logs directory', {error: err});
+}
+
 export const DATA_SOURCE_BASE_URL = process.env.DATA_SOURCE_BASE_URL || "https://ld.integ.stzh.ch/statistics/view/";
-console.log(`[server]: Using data source base URL: ${DATA_SOURCE_BASE_URL}`);
+logger.info(`Using data source base URL: ${DATA_SOURCE_BASE_URL}`);
 export const SPARQL_ENDPOINT = process.env.SPARQL_ENDPOINT || "https://ld.test.stzh.ch/query";
+logger.info(`Using SPARQL endpoint: ${SPARQL_ENDPOINT}`);
 
 const getDataDir = () => {
     const dataDir = process.env.DATA_DIR || path.join(os.tmpdir(), 'melody-data-' + randomUUID());
@@ -30,9 +57,10 @@ const getDataDir = () => {
     try {
         if (!fs.existsSync(dataDir)) {
             fs.mkdirSync(dataDir);
+            logger.info(`Data directory created at ${dataDir}`);
         }
     } catch (err) {
-        console.error(err);
+        logger.error('Error creating data directory', {error: err});
     }
     return dataDir;
 }
@@ -45,7 +73,7 @@ const basePath = process.env.BASE_PATH || '/api/v2';
 const publicURI = process.env.PUBLIC_URI;
 
 if (!port || !baseURI || !basePath) {
-    console.error(
+    logger.error(
         'Environment variables not set. Please set the following environment variables: PORT, BASE_URI, BASE_PATH'
     )
     process.exit(1)
@@ -63,24 +91,24 @@ app.use(basePath, router)
 
 app.use("", readynessRouter);
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.send('Express + TypeScript Server. Hello World');
 });
 
 app.get('/_/health/:tag?', (req, res) => {
-    console.info(`[server]: Health check received; Tag = ${req.params.tag}`);
+    logger.info(`Health check received`, {tag: req.params.tag});
     res.status(200).send();
 });
 
 
 app.listen(port, () => {
     const startupTime = Date.now() - serverStartTime;
-    console.log(`[server]: Server started in ${startupTime}ms`);
-    console.log(`[server]: Server is running at ${baseDestination}`);
-    console.log(`[server]: Swagger UI is running at ${fullPublicPath}/swagger`);
-    console.log(`[server]: Swagger YAML is running at ${fullPath}/swagger.yaml`);
-    console.log(`[server]: SPARQL endpoint is running at ${SPARQL_ENDPOINT}`);
-    if (publicURI) {
-        console.log(`[server]: Server exposed at ${publicURI}`)
-    }
+    logger.info(`Server started`, {
+        startupTimeMs: startupTime,
+        baseDestination,
+        swaggerUI: `${fullPublicPath}/swagger`,
+        swaggerYAML: `${fullPath}/swagger.yaml`,
+        sparqlEndpoint: SPARQL_ENDPOINT,
+        publicURI: publicURI || 'not set'
+    });
 });

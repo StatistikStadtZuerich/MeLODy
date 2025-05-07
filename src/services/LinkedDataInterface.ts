@@ -4,6 +4,7 @@ import path from 'path';
 import {SourceConfig, SourceConfigs} from "../models/models";
 import {LinkedDataError} from "../models/errorModels";
 import {SPARQL_ENDPOINT} from "../server";
+import {getRequestLogger} from "../utils/logger";
 
 interface LinkedDataInterfaceOptions {
     configPath?: string;
@@ -106,15 +107,16 @@ export class LinkedDataInterface {
         return this.sourceConfigs[sourceName];
     }
 
-    async executeQuery(query: string, sourceName: string, config?: SourceConfig): Promise<any> {
+    async executeQuery(query: string, sourceName: string, config?: SourceConfig, requestId?: string): Promise<any> {
+        const reqLogger = getRequestLogger(requestId);
         try {
             const sourceConfig = config || await this.loadSourceConfig(sourceName);
 
             switch (sourceConfig.type) {
                 case 'sparql':
-                    return this.executeSparqlQuery(query, sourceConfig);
+                    return this.executeSparqlQuery(query, sourceConfig, requestId);
                 case 'rest':
-                    return this.executeRESTQuery(query, sourceConfig);
+                    return this.executeRESTQuery(query, sourceConfig, requestId);
                 default:
                     throw new LinkedDataError(
                         `Unsupported query type: ${sourceConfig.type}`,
@@ -127,6 +129,11 @@ export class LinkedDataInterface {
                 throw error;
             }
 
+            reqLogger.error(`Query execution failed`, {
+                error: error instanceof Error ? error.message : String(error),
+                sourceName
+            });
+
             throw new LinkedDataError(
                 `Query execution failed: ${error instanceof Error ? error.message : String(error)}`,
                 'QUERY_EXECUTION_ERROR',
@@ -135,7 +142,9 @@ export class LinkedDataInterface {
         }
     }
 
-    async executeSparqlQuery(query: string, config: SourceConfig): Promise<any> {
+    async executeSparqlQuery(query: string, config: SourceConfig, requestId?: string): Promise<any> {
+        const startTime = Date.now();
+        const reqLogger = getRequestLogger(requestId);
         query = this.processSparqlQueryTemplate(query);
 
         const params: Record<string, string> = {
@@ -180,9 +189,34 @@ export class LinkedDataInterface {
             options.params = params;
         }
 
-        console.log(`Executing SPARQL query on ${config.endpoint}`);
+        reqLogger.info(`Executing SPARQL query`, {
+            endpoint: config.endpoint,
+            method: options.method,
+            queryLength: query.length,
+            format: config.format || 'json',
+            timeout: options.timeout
+        });
 
-        return this.executeWithRetry(options);
+        try {
+            const result = await this.executeWithRetry(options, requestId);
+            const processingTime = Date.now() - startTime;
+
+            reqLogger.info(`SPARQL query completed`, {
+                endpoint: config.endpoint,
+                processingTimeMs: processingTime,
+                resultSize: typeof result === 'string' ? result.length : JSON.stringify(result).length
+            });
+
+            return result;
+        } catch (error) {
+            const processingTime = Date.now() - startTime;
+            reqLogger.error(`SPARQL query failed`, {
+                endpoint: config.endpoint,
+                processingTimeMs: processingTime,
+                error
+            });
+            throw error;
+        }
     }
 
     /**
@@ -201,11 +235,13 @@ export class LinkedDataInterface {
         });
     }
 
-    async executeRESTQuery(query: string, config: SourceConfig): Promise<any> {
+    async executeRESTQuery(query: string, config: SourceConfig, requestId?: string): Promise<any> {
+        const reqLogger = getRequestLogger(requestId);
         let params: Record<string, any>;
         try {
             params = typeof query === 'string' ? JSON.parse(query) : query;
         } catch (error) {
+            reqLogger.error('Invalid REST query parameters', {error});
             throw new LinkedDataError(
                 'Invalid REST query parameters: must be valid JSON',
                 'INVALID_QUERY_FORMAT',
@@ -230,34 +266,76 @@ export class LinkedDataInterface {
             options.data = params;
         }
 
-        return this.executeWithRetry(options);
+        reqLogger.debug('Executing REST query', {
+            endpoint: config.endpoint,
+            method: options.method,
+            timeout: options.timeout
+        });
+
+        return this.executeWithRetry(options, requestId);
     }
 
-    async executeWithRetry(options: AxiosRequestConfig): Promise<any> {
+    async executeWithRetry(options: AxiosRequestConfig, requestId?: string): Promise<any> {
         let lastError: Error | AxiosError | unknown;
+        const startTime = Date.now();
+        const reqLogger = getRequestLogger(requestId);
 
         while (this.runQueue.length > 0) {
+            reqLogger.debug(`Waiting for query queue to clear, current queue length: ${this.runQueue.length}`);
             await this.delay(100);
         }
 
         this.runQueue.push('process');
+        reqLogger.debug(`Starting query execution`, {url: options.url, method: options.method});
 
         try {
             for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
                 try {
-                    console.log(`Executing query on ${options.url}: attempt ${attempt} of ${this.maxRetries}...`);
+                    reqLogger.info(`Executing query`, {
+                        url: options.url,
+                        attempt,
+                        maxRetries: this.maxRetries
+                    });
+
+                    const requestStartTime = Date.now();
                     const response = await axios(options);
-                    console.log(`Query executed successfully on ${options.url}`);
+                    const requestTime = Date.now() - requestStartTime;
+
+                    reqLogger.info(`Query executed successfully`, {
+                        url: options.url,
+                        statusCode: response.status,
+                        responseTimeMs: requestTime,
+                        dataSize: typeof response.data === 'string'
+                            ? response.data.length
+                            : JSON.stringify(response.data).length
+                    });
+
                     return response.data;
                 } catch (error) {
                     lastError = error;
+                    const axiosError = error as AxiosError;
+                    const statusCode = axiosError.response?.status;
+
+                    reqLogger.warn(`Query attempt failed`, {
+                        url: options.url,
+                        attempt,
+                        maxRetries: this.maxRetries,
+                        statusCode,
+                        errorMessage: axiosError.message
+                    });
 
                     const isRetryable = this.isRetryableError(error);
                     if (!isRetryable || attempt === this.maxRetries) {
+                        reqLogger.debug(`Not retrying query`, {
+                            isRetryable,
+                            isLastAttempt: attempt === this.maxRetries
+                        });
                         break;
                     }
 
-                    await this.delay(this.retryDelay * attempt);
+                    const delayTime = this.retryDelay * attempt;
+                    reqLogger.debug(`Retrying query after delay`, {delayMs: delayTime});
+                    await this.delay(delayTime);
                 }
             }
 
@@ -267,6 +345,15 @@ export class LinkedDataInterface {
                 (axiosError.message || 'Unknown error');
             const errorCode = axiosError.response?.status || 500;
 
+            const totalTime = Date.now() - startTime;
+            reqLogger.error(`Query failed after maximum retries`, {
+                url: options.url,
+                attempts: this.maxRetries,
+                totalTimeMs: totalTime,
+                errorCode,
+                errorMessage
+            });
+
             throw new LinkedDataError(
                 `Query failed after ${this.maxRetries} attempts: ${errorMessage}`,
                 `QUERY_FAILED_${errorCode}`,
@@ -274,6 +361,7 @@ export class LinkedDataInterface {
             );
         } finally {
             this.runQueue.shift();
+            reqLogger.debug(`Query execution complete, removed from queue`);
         }
     }
 
