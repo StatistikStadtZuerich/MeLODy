@@ -15,8 +15,10 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Alter ?
     FILTER(regex(str(?Datum),".*-12-31","i")) # TODO should be removed when fix is done
 } ORDER BY ?Datum_nach_Jahr ?Stadtquartier ?Alter ?Heimatland ?Geschlecht`;
 
-export const demographicData: DatasetIdWithQuery = {
-    id: 'demographic',
-    sparqlQuery: query,
-    source: `${DATA_SOURCE_BASE_URL}BEV390OD3903`
-};
+export function getDemographicData(): DatasetIdWithQuery {
+    return {
+        id: 'demographic',
+        sparqlQuery: query,
+        source: `${DATA_SOURCE_BASE_URL}BEV390OD3903`
+    };
+}

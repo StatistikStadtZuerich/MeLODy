@@ -11,8 +11,10 @@ const query = `SELECT (year(?Datum) AS ?Jahr) ?Wirtschaftliche_Wohnbevoelkerung 
 } 
 ORDER BY ?Jahr`;
 
-export const populationDatasetDefinitionWithQuery: DatasetIdWithQuery = {
-    id: 'population',
-    sparqlQuery: query,
-    source: `${DATA_SOURCE_BASE_URL}BEV324OD3243`
-};
+export function getPopulationDatasetDefinitionWithQuery(): DatasetIdWithQuery {
+    return {
+        id: 'population',
+        sparqlQuery: query,
+        source: `${DATA_SOURCE_BASE_URL}BEV324OD3243`
+    };
+}

@@ -13,8 +13,10 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Haushal
     FILTER(regex(str(?Datum),".*-12-31","i")) # TODO should be removed when fix is done
 } ORDER BY ?Datum_nach_Jahr ?Stadtquartier ?Haushaltstyp`;
 
-export const incomeData: DatasetIdWithQuery = {
-    id: 'income',
-    sparqlQuery: query,
-    source: `${DATA_SOURCE_BASE_URL}WIR100OD100A`
-};
+export function getIncomeData(): DatasetIdWithQuery {
+    return {
+        id: 'income',
+        sparqlQuery: query,
+        source: `${DATA_SOURCE_BASE_URL}WIR100OD100A`
+    };
+}

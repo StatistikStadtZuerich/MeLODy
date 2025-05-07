@@ -1,26 +1,28 @@
 import {DatasetIdWithQuery} from "../DatasetIdWithQuery";
-import {populationDatasetDefinitionWithQuery} from "./population";
-import {apartmentData} from "./apartment";
-import {demographicData} from "./demographic";
-import {employmentData} from "./employment";
-import {incomeData} from "./income";
-import {birthData} from "./births";
-import {deathData} from "./death";
-import {fertilityData} from "./fertility";
-import {immigrationData} from "./immigration";
-import {emigrationData} from "./emigration";
-import {mietData} from "./mieten";
+import {getPopulationDatasetDefinitionWithQuery} from "./population";
+import {getApartmentData} from "./apartment";
+import {getDemographicData} from "./demographic";
+import {getEmploymentData} from "./employment";
+import {getIncomeData} from "./income";
+import {getBirthData} from "./births";
+import {getDeathData} from "./death";
+import {getFertilityData} from "./fertility";
+import {getImmigrationData} from "./immigration";
+import {getEmigrationData} from "./emigration";
+import {getMietData} from "./mieten";
 
-export const allDatasets: DatasetIdWithQuery[] = [
-    populationDatasetDefinitionWithQuery,
-    apartmentData,
-    demographicData,
-    employmentData,
-    incomeData,
-    birthData,
-    deathData,
-    fertilityData,
-    immigrationData,
-    emigrationData,
-    mietData
-]
+export function getAllDatasets(): DatasetIdWithQuery[] {
+    return [
+        getPopulationDatasetDefinitionWithQuery(),
+        getApartmentData(),
+        getDemographicData(),
+        getEmploymentData(),
+        getIncomeData(),
+        getBirthData(),
+        getDeathData(),
+        getFertilityData(),
+        getImmigrationData(),
+        getEmigrationData(),
+        getMietData()
+    ];
+}

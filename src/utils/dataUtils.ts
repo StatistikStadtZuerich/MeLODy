@@ -1,5 +1,5 @@
 import {DatasetIdWithQuery} from "../models/DatasetIdWithQuery";
-import {allDatasets} from "../models/datasetDefinitions/allDatasets";
+import {getAllDatasets} from "../models/datasetDefinitions/allDatasets";
 
 export const compressJsonWithIdMapping = (jsonData: Record<string, any>[]): {
     idPerName: Record<string, number>,
@@ -41,8 +41,7 @@ export const extractTablesFromQuery = (query: string): DatasetIdWithQuery[] => {
         }
     }
 
-    return allDatasets.filter(dataset =>
+    return getAllDatasets().filter(dataset =>
         tableNames.has(dataset.id)
     );
 };
-

@@ -18,8 +18,10 @@ const query = `SELECT (year(?Datum) AS ?Datum_nach_Jahr) ?Stadtquartier ?Zimmerz
     FILTER(regex(str(?Datum),".*-12-31","i")) # TODO should be removed when fix is done
 } ORDER BY ?Stadtquartier ?Zimmerzahl ?Eigentumsart ?Bauperiode ?Miete_oder_Eigentum`;
 
-export const apartmentData: DatasetIdWithQuery = {
-    id: 'apartment',
-    sparqlQuery: query,
-    source: `${DATA_SOURCE_BASE_URL}BAU583OD5831`
-};
+export function getApartmentData(): DatasetIdWithQuery {
+    return {
+        id: 'apartment',
+        sparqlQuery: query,
+        source: `${DATA_SOURCE_BASE_URL}BAU583OD5831`
+    };
+}

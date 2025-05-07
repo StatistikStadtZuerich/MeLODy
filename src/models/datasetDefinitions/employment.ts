@@ -11,8 +11,10 @@ const query = `SELECT ?Datum_nach_Quartal ?Beschaeftigungsgrad ?Anzahl_Beschaeft
 } 
 ORDER BY ?Datum_nach_Quartal ?Beschaeftigungsgrad`;
 
-export const employmentData: DatasetIdWithQuery = {
-    id: 'employment',
-    sparqlQuery: query,
-    source: `${DATA_SOURCE_BASE_URL}WIR400OD4004`
-};
+export function getEmploymentData(): DatasetIdWithQuery {
+    return {
+        id: 'employment',
+        sparqlQuery: query,
+        source: `${DATA_SOURCE_BASE_URL}WIR400OD4004`
+    };
+}

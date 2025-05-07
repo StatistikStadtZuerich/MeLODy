@@ -1,6 +1,6 @@
 import {Router} from "express";
 import queryMediator from "../services/QueryMediator";
-import {allDatasets} from "../models/datasetDefinitions/allDatasets";
+import {getAllDatasets} from "../models/datasetDefinitions/allDatasets";
 import {storeCSVInSQLite} from "../utils/csvSqliteUtils";
 import {executeSQLiteQuery, getPrettyDatabaseSchema} from "../utils/sqliteUtils";
 import {compressJsonWithIdMapping, extractTablesFromQuery} from "../utils/dataUtils";
@@ -12,7 +12,7 @@ let datasetsReady = false;
 // Collect all promises
 const allPromises: Promise<void>[] = [];
 
-allDatasets.forEach(dataset => {
+getAllDatasets().forEach(dataset => {
     console.log(`Executing query for dataset ${dataset.id}`);
     let dataPromise: Promise<any> | undefined;
     if (dataset.sparqlQuery) {
