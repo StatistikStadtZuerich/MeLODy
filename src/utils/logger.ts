@@ -11,8 +11,7 @@ const levels = {
 };
 
 const level = () => {
-    const env = process.env.NODE_ENV || 'development';
-    const debugMode = env === 'development' || process.env.DEBUG_MODE === 'true';
+    const debugMode = process.env.DEBUG_MODE === 'true';
 
     return debugMode ? 'debug' : 'info';
 };
