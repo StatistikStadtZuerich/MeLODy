@@ -21,6 +21,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
 export const DATA_SOURCE_BASE_URL = process.env.DATA_SOURCE_BASE_URL || "https://ld.integ.stzh.ch/statistics/view/";
+console.log(`[server]: Using data source base URL: ${DATA_SOURCE_BASE_URL}`);
 export const SPARQL_ENDPOINT = process.env.SPARQL_ENDPOINT || "https://ld.test.stzh.ch/query";
 
 const getDataDir = () => {
@@ -78,6 +79,7 @@ app.listen(port, () => {
     console.log(`[server]: Server is running at ${baseDestination}`);
     console.log(`[server]: Swagger UI is running at ${fullPublicPath}/swagger`);
     console.log(`[server]: Swagger YAML is running at ${fullPath}/swagger.yaml`);
+    console.log(`[server]: SPARQL endpoint is running at ${SPARQL_ENDPOINT}`);
     if (publicURI) {
         console.log(`[server]: Server exposed at ${publicURI}`)
     }
