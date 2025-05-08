@@ -88,7 +88,7 @@ export const getPrettyDatabaseSchema = (requestId?: string): Record<string, Reco
         }
 
         const processingTime = Date.now() - startTime;
-        reqLogger.info('Pretty database schema generated', {
+        reqLogger.debug('Pretty database schema generated', {
             tableCount: Object.keys(prettySchema).length,
             processingTimeMs: processingTime
         });

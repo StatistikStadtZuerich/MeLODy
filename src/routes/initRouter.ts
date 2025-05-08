@@ -6,11 +6,11 @@ import {DATA_DIR} from "../server";
 
 const router = Router();
 
-router.get('/swagger.yaml', (req, res) => {
+router.get('/swagger.yaml', (_req, res) => {
     res.sendFile(path.join(DATA_DIR, "swagger.yaml"));
 });
 
-router.get('/privacy-policy', (req, res) => {
+router.get('/privacy-policy', (_req, res) => {
     res.json({
         policy: "We do not share any information with third parties. Usage data is only used for monitoring issues. No personal data is stored."
     });

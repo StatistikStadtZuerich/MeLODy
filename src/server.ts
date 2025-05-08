@@ -29,22 +29,13 @@ const app = express();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
     req.requestId = randomUUID();
     next();
 });
 
 morgan.token('request-id', (req: any) => req.requestId);
 app.use(morgan('[:request-id] :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', {stream}));
-
-try {
-    if (!fs.existsSync('logs')) {
-        fs.mkdirSync('logs');
-        logger.info('Logs directory created');
-    }
-} catch (err) {
-    logger.error('Error creating logs directory', {error: err});
-}
 
 export const DATA_SOURCE_BASE_URL = process.env.DATA_SOURCE_BASE_URL || "https://ld.integ.stzh.ch/statistics/view/";
 logger.info(`Using data source base URL: ${DATA_SOURCE_BASE_URL}`);

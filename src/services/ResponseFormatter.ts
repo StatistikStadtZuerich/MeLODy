@@ -81,7 +81,7 @@ export class ResponseFormatter {
                 return this.transformArrayResults(results, mapping);
             }
 
-            if (typeof results === 'object' && results !== null) {
+            if (typeof results === 'object') {
                 return this.transformObjectResults(results, mapping);
             }
 

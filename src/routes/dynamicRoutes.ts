@@ -71,20 +71,10 @@ Promise.all(allPromises)
     });
 
 export const readynessRouter = Router();
-var ready = false;
 readynessRouter.get('/_/ready', (req, res) => {
-    const reqLogger = getRequestLogger(req.requestId);
-    if (!ready) {
-        reqLogger.info('Readiness check received');
-    }
     if (datasetsReady) {
-        if (!ready) {
-            reqLogger.info('Readiness check: service is ready');
-        }
-        ready = true;
         res.status(200).send();
     } else {
-        reqLogger.info('Readiness check: service is not ready yet');
         res.status(503).send();
     }
 })
