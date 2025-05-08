@@ -74,7 +74,9 @@ export const readynessRouter = Router();
 var ready = false;
 readynessRouter.get('/_/ready', (req, res) => {
     const reqLogger = getRequestLogger(req.requestId);
-    reqLogger.info('Readiness check received');
+    if (!ready) {
+        reqLogger.info('Readiness check received');
+    }
     if (datasetsReady) {
         if (!ready) {
             reqLogger.info('Readiness check: service is ready');
