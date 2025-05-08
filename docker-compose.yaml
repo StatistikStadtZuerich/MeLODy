@@ -15,3 +15,4 @@ services:
       - PUBLIC_URI=https://melody-1-2-server.ssz.redlink.io
       - SPARQL_ENDPOINT=https://ld.test.stzh.ch/query
       - DATA_SOURCE_BASE_URL=https://ld.integ.stzh.ch/statistics/view/
+      - DEBUG_MODE=false

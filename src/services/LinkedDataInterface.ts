@@ -24,7 +24,7 @@ export class LinkedDataInterface {
 
     constructor(options: LinkedDataInterfaceOptions = {}) {
         this.configPath = options.configPath || path.join(__dirname, 'config', 'sources.json');
-        this.defaultTimeout = options.timeout || 300000; // 30 seconds
+        this.defaultTimeout = options.timeout || 90000; // 90 seconds
         this.maxRetries = options.maxRetries || 10;
         this.retryDelay = options.retryDelay || 1000; // 1 second
         this.sourceConfigs = {};

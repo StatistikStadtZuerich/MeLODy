@@ -50,6 +50,7 @@ export const DATA_SOURCE_BASE_URL = process.env.DATA_SOURCE_BASE_URL || "https:/
 logger.info(`Using data source base URL: ${DATA_SOURCE_BASE_URL}`);
 export const SPARQL_ENDPOINT = process.env.SPARQL_ENDPOINT || "https://ld.test.stzh.ch/query";
 logger.info(`Using SPARQL endpoint: ${SPARQL_ENDPOINT}`);
+logger.info(`Environment: ${process.env.NODE_ENV}`);
 
 const getDataDir = () => {
     const dataDir = process.env.DATA_DIR || path.join(os.tmpdir(), 'melody-data-' + randomUUID());
