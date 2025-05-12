@@ -14,12 +14,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "axios": "^1.7.7",
-    "csv-parse": "^5.5.6",
-    "csv-parser": "^3.0.0",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
-    "luxon": "^3.5.0",
+    "axios": "1.8.2",
+    "csv-parse": "^5.6.0",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "luxon": "^3.6.1",
     "ml-kmeans": "^6.0.0",
     "morgan": "^1.10.0",
     "sqlite": "^5.1.1",
@@ -32,16 +32,16 @@
     "yauzl": "^3.2.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/luxon": "^3.4.2",
-    "@types/node": "^22.13.13",
+    "@types/express": "^5.0.1",
+    "@types/luxon": "^3.6.2",
+    "@types/node": "^22.13.14",
     "@types/swagger-jsdoc": "^6.0.4",
-    "@types/swagger-ui-express": "^4.1.7",
+    "@types/swagger-ui-express": "^4.1.8",
     "@types/yamljs": "^0.2.34",
     "@types/yauzl": "^2.10.3",
     "@types/morgan": "^1.9.9",
-    "nodemon": "^3.1.7",
+    "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.8.3"
   }
 }

@@ -147,6 +147,15 @@ export class LinkedDataInterface {
         const reqLogger = getRequestLogger(requestId);
         query = this.processSparqlQueryTemplate(query);
 
+        const logContext: any = {
+            requestId,
+            startTime,
+            endpoint: config.endpoint,
+            queryLength: query.length,
+            format: config.format || 'json',
+            queryType: 'SPARQL'
+        };
+
         const params: Record<string, string> = {
             query,
             format: config.format || 'json'
@@ -154,14 +163,17 @@ export class LinkedDataInterface {
 
         if (config.defaultGraphUri) {
             params.default_graph_uri = config.defaultGraphUri;
+            logContext.defaultGraphUri = config.defaultGraphUri;
         }
 
         const usePost = query.length > 2000;
+        logContext.method = usePost ? 'POST' : 'GET';
+        logContext.timeout = config.timeout || this.defaultTimeout;
 
         const options: AxiosRequestConfig = {
-            method: usePost ? 'POST' : 'GET',
+            method: logContext.method,
             url: config.endpoint,
-            timeout: config.timeout || this.defaultTimeout,
+            timeout: logContext.timeout,
             headers: {
                 'Accept': config.format === 'csv'
                     ? 'text/csv'
@@ -189,44 +201,34 @@ export class LinkedDataInterface {
             options.params = params;
         }
 
-        reqLogger.info(`Executing SPARQL query`, {
-            endpoint: config.endpoint,
-            method: options.method,
-            queryLength: query.length,
-            format: config.format || 'json',
-            timeout: options.timeout
-        });
+        logContext.query = query
+
+        reqLogger.debug(`Executing SPARQL query`, logContext);
 
         try {
             const result = await this.executeWithRetry(options, requestId);
-            const processingTime = Date.now() - startTime;
+            logContext.processingTimeMs = Date.now() - startTime;
+            logContext.resultSize = typeof result === 'string' ? result.length : JSON.stringify(result).length;
+            logContext.success = true;
 
-            reqLogger.info(`SPARQL query completed`, {
-                endpoint: config.endpoint,
-                processingTimeMs: processingTime,
-                resultSize: typeof result === 'string' ? result.length : JSON.stringify(result).length
-            });
+            reqLogger.debug(`SPARQL query completed`, logContext);
 
             return result;
         } catch (error) {
-            const processingTime = Date.now() - startTime;
-            reqLogger.error(`SPARQL query failed`, {
-                endpoint: config.endpoint,
-                processingTimeMs: processingTime,
-                error
-            });
+            logContext.processingTimeMs = Date.now() - startTime;
+            logContext.error = error instanceof Error ? error.message : String(error);
+            logContext.success = false;
+
+            reqLogger.error(`SPARQL query failed`, logContext);
+
             throw error;
         }
     }
 
-    /**
-     * Process a SPARQL query template that may include conditional sections
-     * Handles sections like {{#if variable}}...{{/if}}
-     */
     private processSparqlQueryTemplate(query: string): string {
         const ifRegex = /{{#if\s+([^}]+)}}\s*([\s\S]*?)\s*{{\/if}}/g;
 
-        return query.replace(ifRegex, (match, condition, content) => {
+        return query.replace(ifRegex, (_match, condition, content) => {
             const conditionValue = condition.trim();
             if (!conditionValue || conditionValue === 'false' || conditionValue === '0') {
                 return '';
@@ -236,12 +238,31 @@ export class LinkedDataInterface {
     }
 
     async executeRESTQuery(query: string, config: SourceConfig, requestId?: string): Promise<any> {
+        const startTime = Date.now();
         const reqLogger = getRequestLogger(requestId);
+
+        const logContext: any = {
+            requestId,
+            startTime,
+            endpoint: config.endpoint,
+            method: config.method || 'GET',
+            timeout: config.timeout || this.defaultTimeout,
+            queryType: 'REST'
+        };
+
         let params: Record<string, any>;
         try {
             params = typeof query === 'string' ? JSON.parse(query) : query;
+
+            const queryStr = JSON.stringify(params);
+            logContext.queryLength = queryStr.length;
+            logContext.query = queryStr.substring(0, 200) + (queryStr.length > 200 ? '...' : '');
+
         } catch (error) {
-            reqLogger.error('Invalid REST query parameters', {error});
+            logContext.error = error instanceof Error ? error.message : String(error);
+            logContext.success = false;
+
+            reqLogger.error('Invalid REST query parameters', logContext);
             throw new LinkedDataError(
                 'Invalid REST query parameters: must be valid JSON',
                 'INVALID_QUERY_FORMAT',
@@ -250,9 +271,9 @@ export class LinkedDataInterface {
         }
 
         const options: AxiosRequestConfig = {
-            method: config.method || 'GET',
+            method: logContext.method,
             url: config.endpoint,
-            timeout: config.timeout || this.defaultTimeout,
+            timeout: logContext.timeout,
             headers: {
                 'Accept': 'application/json',
                 ...(config.headers || {})
@@ -266,13 +287,26 @@ export class LinkedDataInterface {
             options.data = params;
         }
 
-        reqLogger.debug('Executing REST query', {
-            endpoint: config.endpoint,
-            method: options.method,
-            timeout: options.timeout
-        });
+        reqLogger.debug('Executing REST query', logContext);
 
-        return this.executeWithRetry(options, requestId);
+        try {
+            const result = await this.executeWithRetry(options, requestId);
+            logContext.processingTimeMs = Date.now() - startTime;
+            logContext.resultSize = typeof result === 'string' ? result.length : JSON.stringify(result).length;
+            logContext.success = true;
+
+            reqLogger.debug('REST query completed', logContext);
+
+            return result;
+        } catch (error) {
+            logContext.processingTimeMs = Date.now() - startTime;
+            logContext.error = error instanceof Error ? error.message : String(error);
+            logContext.success = false;
+
+            reqLogger.error('REST query failed', logContext);
+
+            throw error;
+        }
     }
 
     async executeWithRetry(options: AxiosRequestConfig, requestId?: string): Promise<any> {
@@ -280,61 +314,67 @@ export class LinkedDataInterface {
         const startTime = Date.now();
         const reqLogger = getRequestLogger(requestId);
 
+        const logContext: any = {
+            requestId,
+            url: options.url,
+            method: options.method,
+            query: options.data instanceof URLSearchParams
+                ? options.data.get('query')
+                : options.params?.query || options.data,
+            startTime
+        };
+
         while (this.runQueue.length > 0) {
-            reqLogger.debug(`Waiting for query queue to clear, current queue length: ${this.runQueue.length}`);
             await this.delay(100);
         }
 
         this.runQueue.push('process');
-        reqLogger.debug(`Starting query execution`, {url: options.url, method: options.method});
+        reqLogger.debug(`Starting query execution`, logContext);
 
         try {
             for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
                 try {
-                    reqLogger.info(`Executing query`, {
-                        url: options.url,
-                        attempt,
-                        maxRetries: this.maxRetries
-                    });
+                    logContext.attempt = attempt;
+                    logContext.maxRetries = this.maxRetries;
+
+                    reqLogger.info(`Executing query`, logContext);
 
                     const requestStartTime = Date.now();
                     const response = await axios(options);
                     const requestTime = Date.now() - requestStartTime;
 
-                    reqLogger.info(`Query executed successfully`, {
-                        url: options.url,
-                        statusCode: response.status,
-                        responseTimeMs: requestTime,
-                        dataSize: typeof response.data === 'string'
-                            ? response.data.length
-                            : JSON.stringify(response.data).length
-                    });
+                    logContext.statusCode = response.status;
+                    logContext.responseTimeMs = requestTime;
+                    logContext.totalTimeMs = Date.now() - startTime;
+                    logContext.dataSize = typeof response.data === 'string'
+                        ? response.data.length
+                        : JSON.stringify(response.data).length;
+
+                    reqLogger.debug(`Query executed successfully`, logContext);
 
                     return response.data;
                 } catch (error) {
                     lastError = error;
                     const axiosError = error as AxiosError;
-                    const statusCode = axiosError.response?.status;
+                    logContext.statusCode = axiosError.response?.status;
+                    logContext.attempt = attempt;
+                    logContext.errorMessage = axiosError.message;
 
-                    reqLogger.warn(`Query attempt failed`, {
-                        url: options.url,
-                        attempt,
-                        maxRetries: this.maxRetries,
-                        statusCode,
-                        errorMessage: axiosError.message
-                    });
+                    reqLogger.warn(`Query attempt failed`, logContext);
 
                     const isRetryable = this.isRetryableError(error);
                     if (!isRetryable || attempt === this.maxRetries) {
-                        reqLogger.debug(`Not retrying query`, {
-                            isRetryable,
-                            isLastAttempt: attempt === this.maxRetries
-                        });
+                        logContext.isRetryable = isRetryable;
+                        logContext.isLastAttempt = attempt === this.maxRetries;
+
+                        reqLogger.debug(`Not retrying query`, logContext);
                         break;
                     }
 
                     const delayTime = this.retryDelay * attempt;
-                    reqLogger.debug(`Retrying query after delay`, {delayMs: delayTime});
+                    logContext.delayMs = delayTime;
+
+                    reqLogger.debug(`Retrying query after delay`, logContext);
                     await this.delay(delayTime);
                 }
             }
@@ -345,14 +385,11 @@ export class LinkedDataInterface {
                 (axiosError.message || 'Unknown error');
             const errorCode = axiosError.response?.status || 500;
 
-            const totalTime = Date.now() - startTime;
-            reqLogger.error(`Query failed after maximum retries`, {
-                url: options.url,
-                attempts: this.maxRetries,
-                totalTimeMs: totalTime,
-                errorCode,
-                errorMessage
-            });
+            logContext.totalTimeMs = Date.now() - startTime;
+            logContext.errorCode = errorCode;
+            logContext.errorMessage = errorMessage;
+
+            reqLogger.error(`Query failed after maximum retries`, logContext);
 
             throw new LinkedDataError(
                 `Query failed after ${this.maxRetries} attempts: ${errorMessage}`,
@@ -361,7 +398,8 @@ export class LinkedDataInterface {
             );
         } finally {
             this.runQueue.shift();
-            reqLogger.debug(`Query execution complete, removed from queue`);
+            logContext.queueLength = this.runQueue.length;
+            reqLogger.debug(`Query execution complete, removed from queue`, logContext);
         }
     }
 

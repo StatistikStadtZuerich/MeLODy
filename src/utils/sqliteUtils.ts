@@ -39,7 +39,7 @@ export const getDatabaseSchema = (requestId?: string): Record<string, Array<{
         }
 
         const processingTime = Date.now() - startTime;
-        reqLogger.info('Database schema retrieved successfully', {
+        reqLogger.debug('Database schema retrieved successfully', {
             tableCount: tables.length,
             processingTimeMs: processingTime
         });
@@ -152,7 +152,7 @@ export const executeSQLiteQuery = (query: string, requestId?: string): any[] => 
         const result = inMemoryDatabase.prepare(query).all();
         const processingTime = Date.now() - startTime;
 
-        reqLogger.info(`SQLite query executed successfully`, {
+        reqLogger.debug(`SQLite query executed successfully`, {
             processingTimeMs: processingTime,
             resultCount: result.length
         });

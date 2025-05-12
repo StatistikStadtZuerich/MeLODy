@@ -35,26 +35,49 @@ export class QueryMediator {
     }
 
     private async _ensureTemplateDirectory(requestId?: string): Promise<void> {
+        const startTime = Date.now();
         const reqLogger = getRequestLogger(requestId);
+
+        const logContext: any = {
+            requestId,
+            startTime,
+            path: this.templateRepository,
+            operation: 'ensureTemplateDirectory'
+        };
+
         try {
             await fs.access(this.templateRepository);
-            reqLogger.debug(`Template directory exists at ${this.templateRepository}`);
+
+            logContext.exists = true;
+            logContext.processingTimeMs = Date.now() - startTime;
+            logContext.success = true;
+
+            reqLogger.debug(`Template directory exists`, logContext);
         } catch (error: any) {
             if (error.code === 'ENOENT') {
                 try {
                     await fs.mkdir(this.templateRepository, {recursive: true});
-                    reqLogger.info(`Created template directory at ${this.templateRepository}`);
+
+                    logContext.created = true;
+                    logContext.processingTimeMs = Date.now() - startTime;
+                    logContext.success = true;
+
+                    reqLogger.debug(`Created template directory`, logContext);
                 } catch (mkdirError) {
-                    reqLogger.error('Failed to create template directory', {
-                        path: this.templateRepository,
-                        error: mkdirError
-                    });
+                    logContext.error = mkdirError instanceof Error ? mkdirError.message : String(mkdirError);
+                    logContext.errorCode = (mkdirError as any).code;
+                    logContext.processingTimeMs = Date.now() - startTime;
+                    logContext.success = false;
+
+                    reqLogger.error('Failed to create template directory', logContext);
                 }
             } else {
-                reqLogger.error('Error accessing template directory', {
-                    path: this.templateRepository,
-                    error
-                });
+                logContext.error = error instanceof Error ? error.message : String(error);
+                logContext.errorCode = error.code;
+                logContext.processingTimeMs = Date.now() - startTime;
+                logContext.success = false;
+
+                reqLogger.error('Error accessing template directory', logContext);
             }
         }
     }
@@ -72,39 +95,43 @@ export class QueryMediator {
     public async executeSparqlQuery(query: string, format: FormatType = 'json', requestId?: string): Promise<string | undefined> {
         const startTime = Date.now();
         const reqLogger = getRequestLogger(requestId);
+
+        const logContext: any = {
+            requestId,
+            startTime,
+            format,
+            queryLength: query?.length || 0
+        };
+
         try {
             if (!query?.length) {
-                reqLogger.warn('Empty SPARQL query received');
+                reqLogger.warn('Empty SPARQL query received', logContext);
                 return undefined
             }
 
-            reqLogger.debug('Executing SPARQL query', {
-                queryLength: query.length,
-                format,
-                query: query.substring(0, 200) + (query.length > 200 ? '...' : '') // Log first 200 chars for debugging
-            });
+            logContext.query = query;
+
+            reqLogger.debug('Executing SPARQL query', logContext);
 
             const queryWithPrefixes = `${STANDARD_PREFIXES}\n${query}`;
 
             const results = await this.dataInterface.executeQuery(queryWithPrefixes, 'ssz', undefined, requestId);
 
             const formattedResults = this.formatter.format(results, format);
-            const processingTime = Date.now() - startTime;
+            logContext.processingTimeMs = Date.now() - startTime;
+            logContext.resultSize = formattedResults ? formattedResults.length : 0;
+            logContext.success = true;
 
-            reqLogger.info('SPARQL query executed successfully', {
-                processingTimeMs: processingTime,
-                format,
-                resultSize: formattedResults ? formattedResults.length : 0
-            });
+            reqLogger.debug('SPARQL query executed successfully', logContext);
 
             return formattedResults;
         } catch (error) {
-            const errorTime = Date.now() - startTime;
-            reqLogger.error('Error executing SPARQL query', {
-                error,
-                processingTimeMs: errorTime,
-                format
-            });
+            logContext.processingTimeMs = Date.now() - startTime;
+            logContext.error = error instanceof Error ? error.message : String(error);
+            logContext.success = false;
+
+            reqLogger.error('Error executing SPARQL query', logContext);
+
             if (error instanceof QueryError) {
                 return undefined;
             }

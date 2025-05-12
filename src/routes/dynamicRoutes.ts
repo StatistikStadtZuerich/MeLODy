@@ -71,7 +71,7 @@ Promise.all(allPromises)
     });
 
 export const readynessRouter = Router();
-readynessRouter.get('/_/ready', (req, res) => {
+readynessRouter.get('/_/ready', (_req, res) => {
     if (datasetsReady) {
         res.status(200).send();
     } else {
@@ -80,7 +80,7 @@ readynessRouter.get('/_/ready', (req, res) => {
 })
 
 
-const router = Router();
+export const openaiRouter = Router();
 
 /**
  * @swagger
@@ -93,15 +93,15 @@ const router = Router();
  *       200:
  *         description: Successfully retrieved schemas
  */
-router.get('/schemas', async (req, res) => {
+openaiRouter.get('/schemas', async (req, res) => {
     const reqLogger = getRequestLogger(req.requestId);
-    reqLogger.info('GET /schemas request received');
+    reqLogger.debug('GET /schemas request received');
     try {
         const startTime = Date.now();
         const schemas = getPrettyDatabaseSchema(req.requestId);
         const processingTime = Date.now() - startTime;
 
-        reqLogger.info('Schemas fetched successfully', {
+        reqLogger.debug('Schemas fetched successfully', {
             processingTimeMs: processingTime,
             schemaCount: Object.keys(schemas).length
         });
@@ -139,10 +139,10 @@ router.get('/schemas', async (req, res) => {
  *             schema:
  *               type: string
  */
-router.post('/query', async (req, res) => {
+openaiRouter.post('/query', async (req, res) => {
     const startTime = Date.now();
     const reqLogger = getRequestLogger(req.requestId);
-    reqLogger.info('POST /query request received');
+    reqLogger.debug('POST /query request received');
 
     try {
         const {query} = req.body || {};
@@ -151,10 +151,6 @@ router.post('/query', async (req, res) => {
             res.status(400).json({error: 'query is required'});
             return;
         }
-
-        reqLogger.info('Executing SQL query', {
-            query: query.substring(0, 200) + (query.length > 200 ? '...' : '') // Log first 200 chars for debugging
-        });
 
         const queryStartTime = Date.now();
         const results = executeSQLiteQuery(query, req.requestId);
@@ -169,17 +165,22 @@ router.post('/query', async (req, res) => {
         const compressedResults = compressJsonWithIdMapping(results);
         const compressionTime = Date.now() - compressionStartTime;
 
-        const datasets = Array.from(new Set(extractTablesFromQuery(query).map(item => (item.source ? item.source : item.file?.split('/').pop()?.replace(/\.zip$/i, '')
-            )
-        ).filter(Boolean))) as string[];
+        const datasets = Array.from(
+            new Set(extractTablesFromQuery(query)
+                .map(item =>
+                    (item.source ? item.source : item.file?.split('/').pop()
+                        ?.replace(/\.zip$/i, ''))
+                ).filter(Boolean))
+        ) as string[];
 
         const resultsWithDatasets = {...compressedResults, sources: datasets};
 
         const totalProcessingTime = Date.now() - startTime;
-        reqLogger.info('Query processed successfully', {
+        reqLogger.debug('Query processed successfully', {
             resultCount: results.length,
             datasetCount: datasets.length,
             queryTimeMs: queryTime,
+            query: query,
             compressionTimeMs: compressionTime,
             totalProcessingTimeMs: totalProcessingTime
         });
@@ -195,4 +196,3 @@ router.post('/query', async (req, res) => {
     }
 });
 
-export default router;

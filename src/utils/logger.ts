@@ -1,6 +1,6 @@
 import winston, {format} from 'winston';
 
-const {combine, timestamp, printf, colorize, json} = format;
+const {combine, timestamp, json} = format;
 
 const levels = {
     error: 0,
@@ -16,13 +16,14 @@ const level = () => {
     return debugMode ? 'debug' : 'info';
 };
 
-const consoleFormat = printf(({level, message, timestamp, requestId, ...metadata}) => {
-    let metaStr = '';
-    if (Object.keys(metadata).length > 0) {
-        metaStr = JSON.stringify(metadata);
-    }
-    const requestIdStr = requestId ? `[${requestId}] ` : '';
-    return `[${timestamp}] [${level}]: ${requestIdStr}${message} ${metaStr}`;
+const jsonFormatter = format((info) => {
+    const {timestamp, level, message, ...rest} = info;
+    return {
+        timestamp,
+        level,
+        message,
+        ...rest
+    };
 });
 
 const timestampFormat = "YYYY-MM-DD HH:mm:ss"
@@ -32,14 +33,15 @@ const logger = winston.createLogger({
     levels,
     format: combine(
         timestamp({format: timestampFormat}),
+        jsonFormatter(),
         json()
     ),
     transports: [
         new winston.transports.Console({
             format: combine(
-                colorize(),
                 timestamp({format: timestampFormat}),
-                consoleFormat
+                jsonFormatter(),
+                json()
             ),
         })
     ],

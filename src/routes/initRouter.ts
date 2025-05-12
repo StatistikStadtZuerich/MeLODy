@@ -1,6 +1,6 @@
 import {Router} from "express";
 import path from "node:path";
-import dynamicRoutes from "./dynamicRoutes";
+import {openaiRouter} from "./dynamicRoutes";
 import {DATA_DIR} from "../server";
 
 
@@ -16,6 +16,6 @@ router.get('/privacy-policy', (_req, res) => {
     });
 });
 
-router.use("", dynamicRoutes)
+router.use("", openaiRouter)
 
 export default router;
