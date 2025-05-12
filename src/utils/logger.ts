@@ -1,6 +1,6 @@
 import winston, {format} from 'winston';
 
-const {combine, timestamp, json} = format;
+const {combine, timestamp} = format;
 
 const levels = {
     error: 0,
@@ -26,22 +26,36 @@ const jsonFormatter = format((info) => {
     };
 });
 
-const timestampFormat = "YYYY-MM-DD HH:mm:ss"
+const jsonSerializer = format(info => {
+    const {timestamp, level, message, ...rest} = info;
+
+    const output = {
+        instant: timestamp,
+        level,
+        message,
+        ...rest
+    };
+
+    info[Symbol.for('message')] = JSON.stringify(output);
+
+    return info;
+
+})
 
 const logger = winston.createLogger({
     level: level(),
     levels,
     format: combine(
-        timestamp({format: timestampFormat}),
+        timestamp(),
         jsonFormatter(),
-        json()
+        jsonSerializer()
     ),
     transports: [
         new winston.transports.Console({
             format: combine(
-                timestamp({format: timestampFormat}),
+                timestamp(),
                 jsonFormatter(),
-                json()
+                jsonSerializer()
             ),
         })
     ],
