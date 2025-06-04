@@ -119,7 +119,7 @@ app.get('/', (_req, res) => {
     res.send('Express + TypeScript Server. Hello World');
 });
 
-app.get('/_/health/:tag?', (req, res) => {
+app.get('/_/health{/:tag}', (req, res) => {
     const logContext = {
         requestId: req.requestId,
         method: req.method,
