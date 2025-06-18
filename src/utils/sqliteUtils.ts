@@ -158,13 +158,13 @@ export const executeSQLiteQuery = (query: string, requestId?: string): any[] => 
         });
 
         return result;
-    } catch (error) {
+    } catch (error: any) {
         const processingTime = Date.now() - startTime;
         reqLogger.error(`Error executing SQLite query`, {
             error,
             processingTimeMs: processingTime,
             query: query.substring(0, 200) + (query.length > 200 ? '...' : '')
         });
-        throw new Error("Failed to execute query");
+        throw error;
     }
 };

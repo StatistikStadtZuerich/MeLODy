@@ -186,13 +186,13 @@ openaiRouter.post('/query', async (req, res) => {
         });
 
         res.status(200).json(JSON.stringify(resultsWithDatasets));
-    } catch (error) {
+    } catch (error: any) {
         const errorTime = Date.now() - startTime;
         reqLogger.error('Error executing query', {
-            error,
+            error: error.message,
             processingTimeMs: errorTime
         });
-        res.status(500).json({error: error});
+        res.status(500).json({error: error.message ?? JSON.stringify(error)});
     }
 });
 
