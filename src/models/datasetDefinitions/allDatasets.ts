@@ -6,7 +6,15 @@ import {getEmploymentData} from "./employment";
 import {getIncomeData} from "./income";
 import {getBirthData} from "./births";
 import {getDeathData} from "./death";
-import {getFertilityData} from "./fertility";
+import {
+    getFertilityData,
+    getFertilityGeburtenzifferJahrData,
+    getFertilityGeburtenzifferJahrHerkunftMutterData,
+    getFertilityJahrAlterHerkunftMutterData,
+    getFertilityJahrAlterMutterData,
+    getFertilityJahrData,
+    getFertilityJahrHerkunftMutterData
+} from "./fertility";
 import {getImmigrationData} from "./immigration";
 import {getEmigrationData} from "./emigration";
 import {getMietData} from "./mieten";
@@ -21,6 +29,12 @@ export function getAllDatasets(): DatasetIdWithQuery[] {
         getBirthData(),
         getDeathData(),
         getFertilityData(),
+        getFertilityGeburtenzifferJahrData(),
+        getFertilityGeburtenzifferJahrHerkunftMutterData(),
+        getFertilityJahrData(),
+        getFertilityJahrAlterHerkunftMutterData(),
+        getFertilityJahrAlterMutterData(),
+        getFertilityJahrHerkunftMutterData(),
         getImmigrationData(),
         getEmigrationData(),
         getMietData()

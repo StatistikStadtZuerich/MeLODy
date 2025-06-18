@@ -30,14 +30,14 @@
     "yauzl": "^3.2.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.2",
+    "@types/express": "^5.0.3",
     "@types/luxon": "^3.6.2",
-    "@types/node": "^22.15.29",
+    "@types/node": "^24.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "@types/yamljs": "^0.2.34",
     "@types/yauzl": "^2.10.3",
-    "@types/morgan": "^1.9.9",
+    "@types/morgan": "^1.9.10",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
