@@ -28,7 +28,7 @@ export const getDatabaseSchema = (requestId?: string): Record<string, Array<{
 
         for (const tableName of tables) {
             const tableInfo = inMemoryDatabase
-                .prepare(`PRAGMA table_info(${tableName})`)
+                .prepare(`PRAGMA table_info([${tableName}])`)
                 .all();
 
             schema[tableName] = tableInfo;
