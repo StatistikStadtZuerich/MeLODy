@@ -165,6 +165,6 @@ export const executeSQLiteQuery = (query: string, requestId?: string): any[] => 
             processingTimeMs: processingTime,
             query: query.substring(0, 200) + (query.length > 200 ? '...' : '')
         });
-        throw new Error("Failed to execute query");
+        throw error ?? new Error("Failed to execute query");
     }
 };
